@@ -1,0 +1,30 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import { ComputeClient } from "@azure/arm-compute";
+import { DefaultAzureCredential } from "@azure/identity";
+
+/**
+ * This sample demonstrates how to update a gallery Script Definition.
+ *
+ * @summary update a gallery Script Definition.
+ * x-ms-original-file: 2025-03-03/galleryScriptExamples/GalleryScript_Update.json
+ */
+async function updateASimpleGalleryScript(): Promise<void> {
+  const credential = new DefaultAzureCredential();
+  const subscriptionId = "{subscription-id}";
+  const client = new ComputeClient(credential, subscriptionId);
+  await client.galleryScripts.update("myResourceGroup", "myGalleryName", "myGalleryScriptName", {
+    description: "This is the gallery script description.",
+    eula: "This is the gallery script EULA.",
+    privacyStatementUri: "{myPrivacyStatementUri}",
+    releaseNoteUri: "{myReleaseNoteUri}",
+    supportedOSType: "Windows",
+  });
+}
+
+async function main(): Promise<void> {
+  await updateASimpleGalleryScript();
+}
+
+main().catch(console.error);

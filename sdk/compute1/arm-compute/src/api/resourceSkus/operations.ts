@@ -1,0 +1,73 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import { ComputeContext as Client } from "../index.js";
+import {
+  _ComputeSkuResourceSkusResult,
+  _computeSkuResourceSkusResultDeserializer,
+  ComputeSkuResourceSku,
+} from "../../models/computeSku/models.js";
+import { errorResponseDeserializer } from "../../models/models.js";
+import {
+  PagedAsyncIterableIterator,
+  buildPagedAsyncIterator,
+} from "../../static-helpers/pagingHelpers.js";
+import { expandUrlTemplate } from "../../static-helpers/urlTemplate.js";
+import { ResourceSkusListOptionalParams } from "./options.js";
+import {
+  StreamableMethod,
+  PathUncheckedResponse,
+  createRestError,
+  operationOptionsToRequestParameters,
+} from "@azure-rest/core-client";
+
+export function _listSend(
+  context: Client,
+  options: ResourceSkusListOptionalParams = { requestOptions: {} },
+): StreamableMethod {
+  const path = expandUrlTemplate(
+    "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/skus{?api%2Dversion,%24filter,includeExtendedLocations}",
+    {
+      subscriptionId: context.subscriptionId,
+      "api%2Dversion": "2021-07-01",
+      "%24filter": options?.filter,
+      includeExtendedLocations: options?.includeExtendedLocations,
+    },
+    {
+      allowReserved: options?.requestOptions?.skipUrlEncoding,
+    },
+  );
+  return context
+    .path(path)
+    .get({
+      ...operationOptionsToRequestParameters(options),
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+    });
+}
+
+export async function _listDeserialize(
+  result: PathUncheckedResponse,
+): Promise<_ComputeSkuResourceSkusResult> {
+  const expectedStatuses = ["200"];
+  if (!expectedStatuses.includes(result.status)) {
+    const error = createRestError(result);
+    error.details = errorResponseDeserializer(result.body);
+    throw error;
+  }
+
+  return _computeSkuResourceSkusResultDeserializer(result.body);
+}
+
+/** Gets the list of Microsoft.Compute SKUs available for your Subscription. */
+export function list(
+  context: Client,
+  options: ResourceSkusListOptionalParams = { requestOptions: {} },
+): PagedAsyncIterableIterator<ComputeSkuResourceSku> {
+  return buildPagedAsyncIterator(
+    context,
+    () => _listSend(context, options),
+    _listDeserialize,
+    ["200"],
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2021-07-01" },
+  );
+}
