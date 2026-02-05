@@ -298,3 +298,141 @@ export function errorResponseDeserializer(item: any): ErrorResponse {
     error: !item["error"] ? item["error"] : errorDetailDeserializer(item["error"]),
   };
 }
+
+/** Defines headers for operation response. */
+export interface RevokeAccessResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface DeleteResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface ApproveRollingUpgradeResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface DeallocateResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface ReimageResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface ReimageAllResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface PerformMaintenanceResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface PowerOffResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface RedeployResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface RestartResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface StartResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface StartExtensionUpgradeResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface StartOSUpgradeResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface CancelResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface DeleteAPrivateEndpointConnectionResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface ConvertToVirtualMachineScaleSetResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface ConvertToManagedDisksResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface ReapplyResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface MigrateToVMScaleSetResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface DeleteInstancesResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface UpdateInstancesResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface SetOrchestrationServiceStateResponse {
+  location?: string;
+  retryAfter?: number;
+}
+
+/** Defines headers for operation response. */
+export interface ScaleOutResponse {
+  location?: string;
+  retryAfter?: number;
+}

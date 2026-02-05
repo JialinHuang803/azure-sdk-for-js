@@ -17,6 +17,14 @@ import { TokenCredential } from '@azure/core-auth';
 export type ActionType = string;
 
 // @public
+export interface ApproveRollingUpgradeResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
+
+// @public
 export interface AvailabilitySetsCancelMigrationToVirtualMachineScaleSetOptionalParams extends OperationOptions {
 }
 
@@ -87,6 +95,14 @@ export enum AzureClouds {
 
 // @public
 export type AzureSupportedClouds = `${AzureClouds}`;
+
+// @public
+export interface CancelResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
 
 // @public
 export interface CapacityReservationGroupsCreateOrUpdateOptionalParams extends OperationOptions {
@@ -4907,7 +4923,31 @@ export type ContinuablePage<TElement, TPage = TElement[]> = TPage & {
 };
 
 // @public
+export interface ConvertToManagedDisksResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
+
+// @public
+export interface ConvertToVirtualMachineScaleSetResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
+
+// @public
 export type CreatedByType = string;
+
+// @public
+export interface DeallocateResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
 
 // @public
 export interface DedicatedHostGroupsCreateOrUpdateOptionalParams extends OperationOptions {
@@ -4992,6 +5032,30 @@ export interface DedicatedHostsRestartOptionalParams extends OperationOptions {
 // @public
 export interface DedicatedHostsUpdateOptionalParams extends OperationOptions {
     updateIntervalInMs?: number;
+}
+
+// @public
+export interface DeleteAPrivateEndpointConnectionResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
+
+// @public
+export interface DeleteInstancesResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
+
+// @public
+export interface DeleteResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
 }
 
 // @public
@@ -6603,6 +6667,14 @@ export interface LogAnalyticsOperations {
 }
 
 // @public
+export interface MigrateToVMScaleSetResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
+
+// @public
 export interface Operation {
     readonly actionType?: ActionType;
     display?: OperationDisplay;
@@ -6641,6 +6713,22 @@ export interface PagedAsyncIterableIterator<TElement, TPage = TElement[], TPageS
 // @public
 export interface PageSettings {
     continuationToken?: string;
+}
+
+// @public
+export interface PerformMaintenanceResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
+
+// @public
+export interface PowerOffResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
 }
 
 // @public
@@ -6683,6 +6771,38 @@ export interface ProxyResource extends Resource {
 }
 
 // @public
+export interface ReapplyResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
+
+// @public
+export interface RedeployResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
+
+// @public
+export interface ReimageAllResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
+
+// @public
+export interface ReimageResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
+
+// @public
 export interface Resource {
     readonly id?: string;
     readonly name?: string;
@@ -6699,6 +6819,14 @@ export interface ResourceSkusListOptionalParams extends OperationOptions {
 // @public
 export interface ResourceSkusOperations {
     list: (options?: ResourceSkusListOptionalParams) => PagedAsyncIterableIterator<ComputeSkuResourceSku>;
+}
+
+// @public
+export interface RestartResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
 }
 
 // @public
@@ -6767,6 +6895,30 @@ export interface RestorePollerOptions<TResult, TResponse extends PathUncheckedRe
     abortSignal?: AbortSignalLike;
     processResponseBody?: (result: TResponse) => Promise<TResult>;
     updateIntervalInMs?: number;
+}
+
+// @public
+export interface RevokeAccessResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
+
+// @public
+export interface ScaleOutResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
+
+// @public
+export interface SetOrchestrationServiceStateResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
 }
 
 // @public
@@ -6913,6 +7065,30 @@ export interface SshPublicKeysUpdateOptionalParams extends OperationOptions {
 }
 
 // @public
+export interface StartExtensionUpgradeResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
+
+// @public
+export interface StartOSUpgradeResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
+
+// @public
+export interface StartResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
+}
+
+// @public
 export interface SystemData {
     createdAt?: Date;
     createdBy?: string;
@@ -6926,6 +7102,14 @@ export interface SystemData {
 export interface TrackedResource extends Resource {
     location: string;
     tags?: Record<string, string>;
+}
+
+// @public
+export interface UpdateInstancesResponse {
+    // (undocumented)
+    location?: string;
+    // (undocumented)
+    retryAfter?: number;
 }
 
 // @public
