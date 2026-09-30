@@ -72,6 +72,8 @@ permissions:
 engine:
   id: copilot
   version: "1.0.80"
+  # Keep endpoint routing deterministic; auto resolved outside the bundled model catalog.
+  model: gpt-5.6-sol
 strict: true
 network:
   allowed:
