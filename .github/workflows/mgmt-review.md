@@ -75,7 +75,7 @@ permissions:
 # Work around github/gh-aw-mcpg#13221 until gh-aw bundles MCPG v0.4.24 or newer.
 engine:
   id: copilot
-  version: "1.0.80"
+  version: "1.0.95"
   # Keep endpoint routing deterministic; auto resolved outside the bundled model catalog.
   model: gpt-5.6-sol
 strict: true
