@@ -88,7 +88,6 @@ tools:
   github:
     toolsets: [context, repos, pull_requests, actions]
   bash: ["cat", "date", "echo", "grep", "head", "ls", "pwd", "sort", "tail", "uniq", "wc"]
-  cache-memory:
   repo-memory:
 safe-outputs:
   steps:
@@ -200,7 +199,7 @@ Azure/azure-sdk-for-js#40072 at `f4a2f407bdfdb9325f0359dc9670bd91a5872999`
 
 ### Step 1 — Context Gathering
 
-1. **Recall past context** — use `cache-memory` to check whether this PR or package has been reviewed before.
+1. Gather current PR context through read-only GitHub tools. Do not persist review state in this fork test.
 
 ### Step 2 - Validate any tool issues
 
