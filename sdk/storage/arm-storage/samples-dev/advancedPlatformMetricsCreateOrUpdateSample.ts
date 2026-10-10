@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to create or update the advanced platform metrics rule for the storage account.
  *
  * @summary create or update the advanced platform metrics rule for the storage account.
- * x-ms-original-file: 2026-06-01/AdvancedPlatformMetricsCRUD/AdvancedPlatformMetricsRules_CreateOrUpdate_AllContainers.json
+ * x-ms-original-file: 2026-09-01/AdvancedPlatformMetricsCRUD/AdvancedPlatformMetricsRules_CreateOrUpdate_AllContainers.json
  */
 async function advancedPlatformMetricsRulesCreateOrUpdateAllContainersCreateAdvancedPlatformMetricsRuleWithAllContainersFilter(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -27,7 +27,7 @@ async function advancedPlatformMetricsRulesCreateOrUpdateAllContainersCreateAdva
  * This sample demonstrates how to create or update the advanced platform metrics rule for the storage account.
  *
  * @summary create or update the advanced platform metrics rule for the storage account.
- * x-ms-original-file: 2026-06-01/AdvancedPlatformMetricsCRUD/AdvancedPlatformMetricsRules_CreateOrUpdate_ContainerList.json
+ * x-ms-original-file: 2026-09-01/AdvancedPlatformMetricsCRUD/AdvancedPlatformMetricsRules_CreateOrUpdate_ContainerList.json
  */
 async function advancedPlatformMetricsRulesCreateOrUpdateContainerListCreateAdvancedPlatformMetricsRuleWithContainerListFilter(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -54,7 +54,7 @@ async function advancedPlatformMetricsRulesCreateOrUpdateContainerListCreateAdva
  * This sample demonstrates how to create or update the advanced platform metrics rule for the storage account.
  *
  * @summary create or update the advanced platform metrics rule for the storage account.
- * x-ms-original-file: 2026-06-01/AdvancedPlatformMetricsCRUD/AdvancedPlatformMetricsRules_CreateOrUpdate_ContainerPrefix.json
+ * x-ms-original-file: 2026-09-01/AdvancedPlatformMetricsCRUD/AdvancedPlatformMetricsRules_CreateOrUpdate_ContainerPrefix.json
  */
 async function advancedPlatformMetricsRulesCreateOrUpdateContainerPrefixCreateAdvancedPlatformMetricsRuleWithContainerPrefixFilter(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -74,10 +74,36 @@ async function advancedPlatformMetricsRulesCreateOrUpdateContainerPrefixCreateAd
   console.log(result);
 }
 
+/**
+ * This sample demonstrates how to create or update the advanced platform metrics rule for the storage account.
+ *
+ * @summary create or update the advanced platform metrics rule for the storage account.
+ * x-ms-original-file: 2026-09-01/AdvancedPlatformMetricsCRUD/AdvancedPlatformMetricsRules_CreateOrUpdate_MetricLevelEnablement.json
+ */
+async function advancedPlatformMetricsRulesCreateOrUpdateMetricLevelEnablementCreateAdvancedPlatformMetricsRuleWithSelectedMetrics(): Promise<void> {
+  const credential = new DefaultAzureCredential();
+  const subscriptionId = "00000000-0000-0000-0000-000000000000";
+  const client = new StorageManagementClient(credential, subscriptionId);
+  const result = await client.advancedPlatformMetrics.createOrUpdate(
+    "res6977",
+    "sto2527",
+    "ContainerLevelCapacityMetrics",
+    {
+      properties: {
+        enabled: true,
+        metricsToEmit: ["ContainerUsedSize"],
+        ruleConfig: { filterType: "AllContainersFilter" },
+      },
+    },
+  );
+  console.log(result);
+}
+
 async function main(): Promise<void> {
   await advancedPlatformMetricsRulesCreateOrUpdateAllContainersCreateAdvancedPlatformMetricsRuleWithAllContainersFilter();
   await advancedPlatformMetricsRulesCreateOrUpdateContainerListCreateAdvancedPlatformMetricsRuleWithContainerListFilter();
   await advancedPlatformMetricsRulesCreateOrUpdateContainerPrefixCreateAdvancedPlatformMetricsRuleWithContainerPrefixFilter();
+  await advancedPlatformMetricsRulesCreateOrUpdateMetricLevelEnablementCreateAdvancedPlatformMetricsRuleWithSelectedMetrics();
 }
 
 main().catch(console.error);
