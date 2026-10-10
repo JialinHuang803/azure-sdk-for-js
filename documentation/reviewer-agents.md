@@ -20,10 +20,17 @@ domain and produces targeted, actionable feedback.
 
 ### Triggering a Review
 
-On GitHub, only repository collaborators with at least **triage** or **write**
-access can add labels to pull requests. When one of these collaborators adds
-the corresponding **label** to a pull request, the agent runs automatically
-via a `pull_request_target` workflow.
+On GitHub, repository collaborators with label permissions can add the
+corresponding **label** to a pull request to request a review. The workflows
+authorize the requester separately; human requesters need **write**, **maintain**,
+or **admin** access.
+
+All seven label-triggered reviewers use the shared intake flow described below.
+Management review also accepts requests from the explicitly allowlisted
+`azure-sdk-automation[bot]`; that bot cannot request the other reviewers.
+In addition, a non-draft pull request is reviewed automatically when its title
+starts with `[AutoPR` and it has the `Mgmt` label. The trusted router and
+management reviewer both validate those conditions through the GitHub API.
 
 For example, to request an architecture review:
 
@@ -38,6 +45,88 @@ For example, to request an architecture review:
 Collaborators with label permissions can apply **multiple labels** to trigger
 several agents on the same PR. Each agent focuses only on its domain and will
 not duplicate findings from other agents.
+
+### Shared Review Intake
+
+Review requests use a split intake, routing, and review flow:
+
+```text
+one or more review-needed labels, or an eligible management AutoPR
+  -> PR Review Intake (pull_request, no repository permissions or checkout)
+  -> PR Review Router (workflow_run, trusted code from the default branch)
+  -> Selected reviewers (workflow_dispatch, API-only reviews and constrained safe outputs)
+```
+
+The router resolves the PR using GitHub's run metadata and commit-to-PR API,
+including for fork PRs whose run metadata has an empty `pull_requests` array.
+It does not download artifacts or execute PR code. It verifies the originating
+workflow, repository, requester, current head SHA, and requested labels before
+dispatching the matching reviewer workflows on the default branch. The intake's
+`request` job must succeed in the current run attempt; a successful workflow
+conclusion with a skipped request job does not activate reviews. If multiple
+current PRs share the commit and carry review labels, routing stops before any
+dispatch and requires an explicit manual review instead. Labels are
+mapped to fixed workflow names in `eng/tools/pr-review/review-request.cjs`, not
+to workflow names supplied by the PR. A failed dispatch is reported without
+preventing dispatch of the other requested reviewers.
+
+The intake definition and its job results are not authorization: a PR can change
+its workflow YAML. For each pending review label, the router reads GitHub's issue
+event history and requires its latest label-change event to be a label addition
+by the original run actor's immutable account ID. That event must be at most five
+minutes before the run's original creation time, not its runner start or rerun
+time. The recorded actor must have the required repository role or reviewer-specific
+bot allowance. Stale labels and labels added by other requesters cannot piggyback
+on the run. Each matching event ID is passed to its reviewer.
+
+For automatic management reviews, the intake is also only a wake-up signal. The
+trusted router resolves the current PR at the intake head and requires it to be
+open, non-draft, titled with the `[AutoPR` prefix, and labeled `Mgmt`. It skips a
+PR that already has `mgmt-review-in-progress` or `mgmt-review-added`. The
+management reviewer independently repeats these checks before claiming the PR,
+which deduplicates overlapping intake events. Human-applied
+`mgmt-review-needed` labels and manual dispatch remain available for retries.
+
+Each reviewer revalidates automatic requests against the same unique PR target
+and the same current label-event ID before claiming the request. Removing or
+reapplying a label invalidates an already dispatched request; a new label event
+requires its own validation. If the intake was delayed beyond the five-minute
+event window, reapply the label or use manual dispatch.
+Because GitHub does not support conditional label deletion, the worker rechecks
+the event immediately before removing the request label and verifies the recorded
+removal afterward. If it consumed a replacement request, it restores the missing
+label on the current open PR even if new commits arrived, and fails without
+starting the review; the requester must reapply the label or
+dispatch manually, since the bot's restoration is not review authorization.
+When starting, it consumes its request label and replaces it with its in-progress
+label. For example, Archie replaces
+`architecture-review-needed` with `architecture-review-in-progress`. Runs for the
+same reviewer and PR are serialized, while different reviewers run independently.
+Duplicate automatic requests skip once their label has been consumed. Review
+output is rejected if the PR closes or its head changes during the review.
+Reapply the request label or use a manual dispatch to retry a failed or stale
+review.
+
+For a manual retry, run the desired reviewer (for example, **Architecture Review**)
+from the Actions UI on the default branch, supplying `item_number`. `head_sha` is
+optional for manual reviews; when supplied, it must still be the current PR head. Leave
+`request_run_id` and `request_event_id` empty: the router supplies these inputs for automatic
+requests. Manual reviews do not require the request label.
+
+The intake, router, validation helper, and reviewer workflows must be on the
+default branch before this flow can run. Fork workflow approval requirements
+still apply to the intake, and `pull_request` events do not run for PRs with merge
+conflicts. A maintainer can use manual dispatch in those cases.
+
+All reviewers inspect PR content as data through the GitHub API. They do not
+check out or execute PR code. In particular, Dash evaluates existing benchmark
+evidence from unprivileged CI for the reviewed commit rather than running
+PR-derived microbenchmarks inside the privileged reviewer. When evidence is
+missing, it reports the performance claim as unverified.
+
+To add another reviewer, extend the intake's label filter and the fixed routing
+map in `eng/tools/pr-review/review-request.cjs`, then give that reviewer the same
+validated dispatch contract. The bot allowlist is scoped to each reviewer.
 
 ### What to Expect
 

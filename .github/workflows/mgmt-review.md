@@ -18,6 +18,10 @@ on:
         description: GitHub label-event ID (set by the trusted router)
         required: false
         type: string
+      request_kind:
+        description: Trusted automatic request kind (set by the trusted router)
+        required: false
+        type: string
   bots: [github-actions, azure-sdk-automation]
 jobs:
   safe_outputs:
@@ -155,8 +159,8 @@ timeout-minutes: 35
 ---
 
 <!--
-Fork deployment source: Azure/azure-sdk-for-js@553544557c42b9bc1f19779a4f0fda4bfaad8b0b.
-Manual-only test: no shared intake/router is deployed to avoid changing other reviewers.
+Fork deployment source: Azure/azure-sdk-for-js@ba6dd292c75f268e7240948ebefcf045e24c040a.
+The shared intake/router is deployed to test automatic management review routing.
 Validate the deployed reviewer with PR_REVIEW_TEST_REVIEWERS=mgmt-review and
 node --test eng/tools/pr-review/review-request.test.cjs.
 Compile with gh-aw v0.89.21.
