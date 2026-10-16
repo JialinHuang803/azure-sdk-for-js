@@ -179,8 +179,8 @@ Follow the guidelines in [mgmt-review-guidelines.md](../prompts/mgmt-review-guid
 Read that guideline file from this workflow's trusted commit `${{ needs.validate_request.outputs.workflow_sha }}`
 in `${{ github.repository }}`, not from the PR head or its base branch.
 For this fork test, the guideline file is copied verbatim from
-Azure/azure-sdk-for-js#40072 at `f4a2f407bdfdb9325f0359dc9670bd91a5872999`
-(blob `2348c1c8415e618319aaf9d71d181e90defb0075`).
+Azure/azure-sdk-for-js#40369 at `f945142734cbfe465adc6ec40523c30ec8583eb7`
+(blob `603d8b96b2271ebc6ff50e7caa2bcd79b1191533`).
 
 ### Important Constraints
 
