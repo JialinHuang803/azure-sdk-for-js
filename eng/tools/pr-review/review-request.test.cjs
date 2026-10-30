@@ -1297,23 +1297,18 @@ test("management review keeps memory scoped to the Actions cache", () => {
   assert.doesNotMatch(compiled, /push_repo_memory/);
 });
 
-test("management review trusts its fork fixture author without lowering the integrity threshold", () => {
+test("management review allows public fixture content without trusted-user exemptions", () => {
   const management = workflowText("mgmt-review.md");
   const github = management.split("\n  github:\n")[1].split("\n  bash:")[0];
   assert.match(github, /^    allowed-repos: public$/m);
-  assert.match(github, /^    min-integrity: approved$/m);
-  assert.match(github, /^    trusted-users: \["JialinHuang803"\]$/m);
+  assert.match(github, /^    min-integrity: none$/m);
+  assert.doesNotMatch(github, /^\s+trusted-users:/m);
 
   const compiled = workflowText("mgmt-review.lock.yml");
   const githubPolicy = compiled.split('"guard-policies": {')[1].split('"safeoutputs": {')[0];
-  assert.match(githubPolicy, /"min-integrity": "approved"/);
+  assert.match(githubPolicy, /"min-integrity": "none"/);
   assert.match(githubPolicy, /"repos": "public"/);
-  assert.match(compiled, /^          GH_AW_TRUSTED_USERS_EXTRA: JialinHuang803$/m);
-  assert.match(
-    compiled,
-    /GH_AW_GUARD_TRUSTED_USERS: \$\{\{ steps\.parse-guard-vars\.outputs\.trusted_users \}\}/,
-  );
-  assert.match(githubPolicy, /"trusted-users": \$\{GH_AW_GUARD_TRUSTED_USERS\}/);
+  assert.doesNotMatch(compiled, /^          GH_AW_TRUSTED_USERS_EXTRA:/m);
   assert.match(compiled, /"write-sink": \{/);
 });
 
