@@ -45,7 +45,7 @@ export function _revokeAccessSend(
       restorePointCollectionName: restorePointCollectionName,
       vmRestorePointName: vmRestorePointName,
       diskRestorePointName: diskRestorePointName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -58,7 +58,9 @@ export async function _revokeAccessDeserialize(result: PathUncheckedResponse): P
   const expectedStatuses = ["202", "200", "201"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -88,7 +90,7 @@ export function revokeAccess(
         options,
       ),
     resourceLocationConfig: "location",
-    apiVersion: "2025-01-02",
+    apiVersion: "2026-03-02",
   }) as PollerLike<OperationState<void>, void>;
 }
 
@@ -109,7 +111,7 @@ export function _grantAccessSend(
       restorePointCollectionName: restorePointCollectionName,
       vmRestorePointName: vmRestorePointName,
       diskRestorePointName: diskRestorePointName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -124,10 +126,12 @@ export function _grantAccessSend(
 }
 
 export async function _grantAccessDeserialize(result: PathUncheckedResponse): Promise<AccessUri> {
-  const expectedStatuses = ["202", "200", "201"];
+  const expectedStatuses = ["200", "202", "201"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -145,7 +149,7 @@ export function grantAccess(
   grantAccessData: GrantAccessData,
   options: DiskRestorePointGrantAccessOptionalParams = { requestOptions: {} },
 ): PollerLike<OperationState<AccessUri>, AccessUri> {
-  return getLongRunningPoller(context, _grantAccessDeserialize, ["202", "200", "201"], {
+  return getLongRunningPoller(context, _grantAccessDeserialize, ["200", "202", "201"], {
     updateIntervalInMs: options?.updateIntervalInMs,
     abortSignal: options?.abortSignal,
     getInitialResponse: () =>
@@ -159,7 +163,7 @@ export function grantAccess(
         options,
       ),
     resourceLocationConfig: "location",
-    apiVersion: "2025-01-02",
+    apiVersion: "2026-03-02",
   }) as PollerLike<OperationState<AccessUri>, AccessUri>;
 }
 
@@ -177,7 +181,7 @@ export function _listByRestorePointSend(
       resourceGroupName: resourceGroupName,
       restorePointCollectionName: restorePointCollectionName,
       vmRestorePointName: vmRestorePointName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -195,7 +199,9 @@ export async function _listByRestorePointDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -223,7 +229,7 @@ export function listByRestorePoint(
       ),
     _listByRestorePointDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2025-01-02" },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2026-03-02" },
   );
 }
 
@@ -243,7 +249,7 @@ export function _getSend(
       restorePointCollectionName: restorePointCollectionName,
       vmRestorePointName: vmRestorePointName,
       diskRestorePointName: diskRestorePointName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -259,7 +265,9 @@ export async function _getDeserialize(result: PathUncheckedResponse): Promise<Di
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }

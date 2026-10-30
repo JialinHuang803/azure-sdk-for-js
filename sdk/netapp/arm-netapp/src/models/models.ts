@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-/**
+/*
  * This file contains only generated model types and their (de)serializers.
  * Disable the following rules for internal models with '_' prefix and deserializers which require 'any' for raw JSON input.
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+
 /** A list of REST API operations supported by an Azure Resource Provider. It contains an URL link to get the next set of results. */
 export interface _OperationListResult {
   /** The Operation items on this page */
@@ -680,7 +681,10 @@ export interface VolumeProperties {
   usageThreshold: number;
   /** Set of export policy rules */
   exportPolicy?: VolumePropertiesExportPolicy;
-  /** Set of protocol types, default NFSv3, CIFS for SMB protocol */
+  /**
+   * Specify the protocol types for the volume. Supported values are NFSv3, NFSv4.1, and CIFS. For SMB volumes, specify CIFS.
+   * The value SMB isn't supported in the protocolTypes property. Default: NFSv3
+   */
   protocolTypes?: string[];
   /** Azure lifecycle management */
   readonly provisioningState?: string;
@@ -781,7 +785,10 @@ export interface VolumeProperties {
   readonly encrypted?: boolean;
   /** Application specific placement rules for the particular volume */
   placementRules?: PlacementKeyValuePairs[];
-  /** Flag indicating whether subvolume operations are enabled on the volume */
+  /**
+   * Flag indicating whether subvolume operations are enabled on the volume
+   * Deprecated. Subvolume operations and this flag will be removed in a future API version.
+   */
   enableSubvolumes?: EnableSubvolumes;
   /** The availability zone where the volume is provisioned. This refers to the logical availability zone where the volume resides. */
   readonly provisionedAvailabilityZone?: string | null;
@@ -791,6 +798,8 @@ export interface VolumeProperties {
   readonly originatingResourceId?: string | null;
   /** Space shared by short term clone volume with parent volume in bytes. */
   readonly inheritedSizeInBytes?: number | null;
+  /** Specifies whether the volume operates in Breakthrough Mode. */
+  breakthroughMode?: BreakthroughMode;
 }
 
 export function volumePropertiesSerializer(item: VolumeProperties): any {
@@ -845,6 +854,7 @@ export function volumePropertiesSerializer(item: VolumeProperties): any {
       : placementKeyValuePairsArraySerializer(item["placementRules"]),
     enableSubvolumes: item["enableSubvolumes"],
     isLargeVolume: item["isLargeVolume"],
+    breakthroughMode: item["breakthroughMode"],
   };
 }
 
@@ -925,6 +935,7 @@ export function volumePropertiesDeserializer(item: any): VolumeProperties {
     isLargeVolume: item["isLargeVolume"],
     originatingResourceId: item["originatingResourceId"],
     inheritedSizeInBytes: item["inheritedSizeInBytes"],
+    breakthroughMode: item["breakthroughMode"],
   };
 }
 
@@ -1734,7 +1745,10 @@ export enum KnownAvsDataStore {
  */
 export type AvsDataStore = string;
 
-/** Flag indicating whether subvolume operations are enabled on the volume */
+/**
+ * Flag indicating whether subvolume operations are enabled on the volume
+ * Deprecated. This type will be removed in a future API version.
+ */
 export enum KnownEnableSubvolumes {
   /** subvolumes are enabled */
   Enabled = "Enabled",
@@ -1743,7 +1757,8 @@ export enum KnownEnableSubvolumes {
 }
 
 /**
- * Flag indicating whether subvolume operations are enabled on the volume \
+ * Flag indicating whether subvolume operations are enabled on the volume
+ * Deprecated. This type will be removed in a future API version. \
  * {@link KnownEnableSubvolumes} can be used interchangeably with EnableSubvolumes,
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
@@ -1751,6 +1766,30 @@ export enum KnownEnableSubvolumes {
  * **Disabled**: subvolumes are not enabled
  */
 export type EnableSubvolumes = string;
+
+/**
+ * Specifies whether the volume operates in Breakthrough Mode. When set to 'Enabled', the volume runs on the resources configured for this mode,
+ * delivering improved performance and higher throughput. If set to 'Disabled' or omitted, the volume uses the basic configuration. This feature
+ * is available only in regions where it’s been configured and first-time users must finish onboarding prior to using Breakthrough Mode.
+ */
+export enum KnownBreakthroughMode {
+  /** The volume runs on the resources configured for Breakthrough mode which ensures consistent high performance and a higher throughput. */
+  Enabled = "Enabled",
+  /** The volume uses configuration that provides basic performance and throughput. */
+  Disabled = "Disabled",
+}
+
+/**
+ * Specifies whether the volume operates in Breakthrough Mode. When set to 'Enabled', the volume runs on the resources configured for this mode,
+ * delivering improved performance and higher throughput. If set to 'Disabled' or omitted, the volume uses the basic configuration. This feature
+ * is available only in regions where it’s been configured and first-time users must finish onboarding prior to using Breakthrough Mode. \
+ * {@link KnownBreakthroughMode} can be used interchangeably with BreakthroughMode,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Enabled**: The volume runs on the resources configured for Breakthrough mode which ensures consistent high performance and a higher throughput. \
+ * **Disabled**: The volume uses configuration that provides basic performance and throughput.
+ */
+export type BreakthroughMode = string;
 
 /** List of volume group resources */
 export interface _VolumeGroupList {
@@ -2188,7 +2227,10 @@ export interface VolumePatchProperties {
   usageThreshold?: number;
   /** Set of export policy rules */
   exportPolicy?: VolumePatchPropertiesExportPolicy;
-  /** Set of protocol types, default NFSv3, CIFS for SMB protocol */
+  /**
+   * Specify the protocol types for the volume. Supported values are NFSv3, NFSv4.1, and CIFS. For SMB volumes, specify CIFS.
+   * The value SMB isn't supported in the protocolTypes property. Default: NFSv3
+   */
   protocolTypes?: string[];
   /** Maximum throughput in MiB/s that can be achieved by this volume and this will be accepted as input only for manual qosType volume */
   throughputMibps?: number;
@@ -3347,6 +3389,12 @@ export function volumeQuotaRulesPropertiesDeserializer(item: any): VolumeQuotaRu
 
 /** Gets the status of the VolumeQuotaRule at the time the operation was called. */
 export enum KnownNetAppProvisioningState {
+  /** Resource has been created. */
+  Succeeded = "Succeeded",
+  /** Resource creation failed. */
+  Failed = "Failed",
+  /** Resource creation was canceled. */
+  Canceled = "Canceled",
   /** Resource has been Accepted */
   Accepted = "Accepted",
   /** Resource is being Created */
@@ -3359,10 +3407,6 @@ export enum KnownNetAppProvisioningState {
   Deleting = "Deleting",
   /** Resource is being Moved */
   Moving = "Moving",
-  /** Resource has Failed */
-  Failed = "Failed",
-  /** Resource has Succeeded */
-  Succeeded = "Succeeded",
 }
 
 /**
@@ -3370,14 +3414,15 @@ export enum KnownNetAppProvisioningState {
  * {@link KnownNetAppProvisioningState} can be used interchangeably with NetAppProvisioningState,
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
+ * **Succeeded**: Resource has been created. \
+ * **Failed**: Resource creation failed. \
+ * **Canceled**: Resource creation was canceled. \
  * **Accepted**: Resource has been Accepted \
  * **Creating**: Resource is being Created \
  * **Patching**: Resource is being Patched \
  * **Updating**: Resource is updating \
  * **Deleting**: Resource is being Deleted \
- * **Moving**: Resource is being Moved \
- * **Failed**: Resource has Failed \
- * **Succeeded**: Resource has Succeeded
+ * **Moving**: Resource is being Moved
  */
 export type NetAppProvisioningState = string;
 
@@ -4321,6 +4366,8 @@ export interface CacheProperties {
   globalFileLocking?: GlobalFileLockingState;
   /** Flag indicating whether writeback is enabled for the cache. */
   writeBack?: EnableWriteBackState;
+  /** Flag indicating whether file access logs are enabled for the Cache, based on active diagnostic settings present on the Cache. */
+  readonly fileAccessLogs?: CacheFileAccessLogs;
 }
 
 export function cachePropertiesSerializer(item: CacheProperties): any {
@@ -4391,6 +4438,7 @@ export function cachePropertiesDeserializer(item: any): CacheProperties {
     cifsChangeNotifications: item["cifsChangeNotifications"],
     globalFileLocking: item["globalFileLocking"],
     writeBack: item["writeBack"],
+    fileAccessLogs: item["fileAccessLogs"],
   };
 }
 
@@ -4536,9 +4584,9 @@ export type KerberosState = string;
 export interface SmbSettings {
   /** Enables encryption for in-flight smb3 data. Only applicable for SMB/DualProtocol cache. */
   smbEncryption?: SmbEncryptionState;
-  /** Enables access-based enumeration share property for SMB Shares. Only applicable for SMB/DualProtocol volume */
+  /** Enables access-based enumeration share property for SMB Shares. Only applicable for SMB/DualProtocol cache */
   smbAccessBasedEnumeration?: SmbAccessBasedEnumeration;
-  /** Enables non-browsable property for SMB Shares. Only applicable for SMB/DualProtocol volume */
+  /** Enables non-browsable property for SMB Shares. Only applicable for SMB/DualProtocol cache */
   smbNonBrowsable?: SmbNonBrowsable;
 }
 
@@ -4937,6 +4985,24 @@ export enum KnownEnableWriteBackState {
  */
 export type EnableWriteBackState = string;
 
+/** Flag indicating whether file access logs are enabled for the Cache, based on active diagnostic settings present on the Cache. */
+export enum KnownCacheFileAccessLogs {
+  /** fileAccessLogs are enabled */
+  Enabled = "Enabled",
+  /** fileAccessLogs are not enabled */
+  Disabled = "Disabled",
+}
+
+/**
+ * Flag indicating whether file access logs are enabled for the Cache, based on active diagnostic settings present on the Cache. \
+ * {@link KnownCacheFileAccessLogs} can be used interchangeably with CacheFileAccessLogs,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Enabled**: fileAccessLogs are enabled \
+ * **Disabled**: fileAccessLogs are not enabled
+ */
+export type CacheFileAccessLogs = string;
+
 /** The type used for update operations of the Cache. */
 export interface CacheUpdate {
   /** Resource tags. */
@@ -5221,6 +5287,8 @@ export interface AccountProperties {
   nfsV4IDDomain?: string | null;
   /** MultiAD Status for the account */
   readonly multiAdStatus?: MultiAdStatus;
+  /** LDAP Configuration for the account. */
+  ldapConfiguration?: LdapConfiguration;
 }
 
 export function accountPropertiesSerializer(item: AccountProperties): any {
@@ -5232,6 +5300,9 @@ export function accountPropertiesSerializer(item: AccountProperties): any {
       ? item["encryption"]
       : accountEncryptionSerializer(item["encryption"]),
     nfsV4IDDomain: item["nfsV4IDDomain"],
+    ldapConfiguration: !item["ldapConfiguration"]
+      ? item["ldapConfiguration"]
+      : ldapConfigurationSerializer(item["ldapConfiguration"]),
   };
 }
 
@@ -5247,6 +5318,9 @@ export function accountPropertiesDeserializer(item: any): AccountProperties {
     disableShowmount: item["disableShowmount"],
     nfsV4IDDomain: item["nfsV4IDDomain"],
     multiAdStatus: item["multiAdStatus"],
+    ldapConfiguration: !item["ldapConfiguration"]
+      ? item["ldapConfiguration"]
+      : ldapConfigurationDeserializer(item["ldapConfiguration"]),
   };
 }
 
@@ -5599,6 +5673,154 @@ export enum KnownMultiAdStatus {
  */
 export type MultiAdStatus = string;
 
+/** LDAP configuration */
+export interface LdapConfiguration {
+  /** Name of the LDAP configuration domain */
+  domain?: string;
+  /** List of LDAP server IP addresses (IPv4 only) for the LDAP domain. */
+  ldapServers?: string[];
+  /** Indicates the secure LDAP mode for encrypting communication between ANF storage and customer LDAP servers. */
+  secureLdapType?: SecureLdapType;
+  /** When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded ldap servers CA certificate. */
+  serverCACertificate?: string;
+  /** The CN host name used while generating the certificate, LDAP Over TLS requires the CN host name to create DNS host entry. */
+  certificateCNHost?: string | null;
+  /** List of DNS server IPv4 addresses for resolving the CN host certificate. This parameter is used when LDAP over TLS is enabled. */
+  dnsServers?: string[];
+  /** Port number for LDAP communication. Default is 389 for LDAP. */
+  ldapPort?: number;
+  /** This specifies the user DN (Distinguished Name), which overrides the base DN for user lookups. */
+  userDN?: string;
+  /** This specifies the group DN (Distinguished Name), which overrides the base DN for group lookups. */
+  groupDN?: string;
+  /** This specifies the netgroup DN (Distinguished Name), which overrides the base DN for netgroup lookups. */
+  netGroupDN?: string;
+  /** The authentication level to use when binding to the LDAP server, defaults to Anonymous. */
+  bindAuthenticationLevel?: BindAuthenticationLevel;
+  /** The distinguished name (DN) to bind as when performing LDAP operations. */
+  bindDN?: string;
+  /** The Azure Key Vault configuration where the Bind DN (Distinguished Name) user password is stored. */
+  bindPasswordAkvConfig?: BindPasswordAkvConfig;
+}
+
+export function ldapConfigurationSerializer(item: LdapConfiguration): any {
+  return {
+    domain: item["domain"],
+    ldapServers: !item["ldapServers"]
+      ? item["ldapServers"]
+      : item["ldapServers"].map((p: any) => {
+          return p;
+        }),
+    secureLdapType: item["secureLdapType"],
+    serverCACertificate: item["serverCACertificate"],
+    certificateCNHost: item["certificateCNHost"],
+    dnsServers: !item["dnsServers"]
+      ? item["dnsServers"]
+      : item["dnsServers"].map((p: any) => {
+          return p;
+        }),
+    ldapPort: item["ldapPort"],
+    userDN: item["userDN"],
+    groupDN: item["groupDN"],
+    netGroupDN: item["netGroupDN"],
+    bindAuthenticationLevel: item["bindAuthenticationLevel"],
+    bindDN: item["bindDN"],
+    bindPasswordAkvConfig: !item["bindPasswordAkvConfig"]
+      ? item["bindPasswordAkvConfig"]
+      : bindPasswordAkvConfigSerializer(item["bindPasswordAkvConfig"]),
+  };
+}
+
+export function ldapConfigurationDeserializer(item: any): LdapConfiguration {
+  return {
+    domain: item["domain"],
+    ldapServers: !item["ldapServers"]
+      ? item["ldapServers"]
+      : item["ldapServers"].map((p: any) => {
+          return p;
+        }),
+    secureLdapType: item["secureLdapType"],
+    serverCACertificate: item["serverCACertificate"],
+    certificateCNHost: item["certificateCNHost"],
+    dnsServers: !item["dnsServers"]
+      ? item["dnsServers"]
+      : item["dnsServers"].map((p: any) => {
+          return p;
+        }),
+    ldapPort: item["ldapPort"],
+    userDN: item["userDN"],
+    groupDN: item["groupDN"],
+    netGroupDN: item["netGroupDN"],
+    bindAuthenticationLevel: item["bindAuthenticationLevel"],
+    bindDN: item["bindDN"],
+    bindPasswordAkvConfig: !item["bindPasswordAkvConfig"]
+      ? item["bindPasswordAkvConfig"]
+      : bindPasswordAkvConfigDeserializer(item["bindPasswordAkvConfig"]),
+  };
+}
+
+/** Indicates the secure LDAP mode for encrypting communication between ANF storage and customer LDAP servers. */
+export enum KnownSecureLdapType {
+  /** LDAP traffic is encrypted using LDAP over TLS. */
+  LdapOverTLS = "LdapOverTLS",
+  /** LDAP traffic is not encrypted. */
+  None = "None",
+}
+
+/**
+ * Indicates the secure LDAP mode for encrypting communication between ANF storage and customer LDAP servers. \
+ * {@link KnownSecureLdapType} can be used interchangeably with SecureLdapType,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **LdapOverTLS**: LDAP traffic is encrypted using LDAP over TLS. \
+ * **None**: LDAP traffic is not encrypted.
+ */
+export type SecureLdapType = string;
+
+/** The authentication level to use when binding to the LDAP server. */
+export enum KnownBindAuthenticationLevel {
+  /** Anonymous bind i.e. no credentials provided */
+  Anonymous = "Anonymous",
+  /** Simple bind i.e. plain text credentials provided */
+  Simple = "Simple",
+}
+
+/**
+ * The authentication level to use when binding to the LDAP server. \
+ * {@link KnownBindAuthenticationLevel} can be used interchangeably with BindAuthenticationLevel,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Anonymous**: Anonymous bind i.e. no credentials provided \
+ * **Simple**: Simple bind i.e. plain text credentials provided
+ */
+export type BindAuthenticationLevel = string;
+
+/** The Azure Key Vault configuration where the Bind DN (Distinguished Name) user password is stored. */
+export interface BindPasswordAkvConfig {
+  /** The Azure Key Vault URI where the Bind DN user password is stored. */
+  azureKeyVaultUri: string;
+  /** The name of the secret in Azure Key Vault that contains the Bind DN user password. */
+  secretName: string;
+  /** The ARM resource identifier of the user assigned identity used to authenticate with key vault. */
+  userAssignedIdentity?: string;
+}
+
+export function bindPasswordAkvConfigSerializer(item: BindPasswordAkvConfig): any {
+  return {
+    azureKeyVaultUri: item["azureKeyVaultUri"],
+    secretName: item["secretName"],
+    userAssignedIdentity: item["userAssignedIdentity"],
+  };
+}
+
+export function bindPasswordAkvConfigDeserializer(item: any): BindPasswordAkvConfig {
+  return {
+    azureKeyVaultUri: item["azureKeyVaultUri"],
+    secretName: item["secretName"],
+    userAssignedIdentity: item["userAssignedIdentity"],
+  };
+}
+
 /** Managed service identity (system assigned and/or user assigned identities) */
 export interface ManagedServiceIdentity {
   /** The service principal ID of the system assigned identity. This property will only be provided for a system assigned identity. */
@@ -5676,32 +5898,273 @@ export function userAssignedIdentityDeserializer(item: any): UserAssignedIdentit
 
 /** NetApp account patch resource */
 export interface NetAppAccountPatch {
-  /** Resource location */
-  location?: string;
-  /** Resource Id */
-  readonly id?: string;
-  /** Resource name */
-  readonly name?: string;
-  /** Resource type */
-  readonly type?: string;
-  /** Resource tags */
+  /** The managed service identities assigned to this resource. */
+  identity?: ManagedServiceIdentity;
+  /** Resource tags. */
   tags?: Record<string, string>;
   /** NetApp Account properties */
-  properties?: AccountProperties;
-  /** The identity used for the resource. */
-  identity?: ManagedServiceIdentity;
+  properties?: AccountPropertiesPatch;
 }
 
 export function netAppAccountPatchSerializer(item: NetAppAccountPatch): any {
   return {
-    location: item["location"],
-    tags: item["tags"],
-    properties: !item["properties"]
-      ? item["properties"]
-      : accountPropertiesSerializer(item["properties"]),
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentitySerializer(item["identity"]),
+    tags: item["tags"],
+    properties: !item["properties"]
+      ? item["properties"]
+      : accountPropertiesPatchSerializer(item["properties"]),
+  };
+}
+
+/** NetApp account patch properties */
+export interface AccountPropertiesPatch {
+  /** Active Directories */
+  activeDirectories?: ActiveDirectoryPatch[];
+  /** Encryption settings */
+  encryption?: AccountEncryptionPatch;
+  /** Domain for NFSv4 user ID mapping. This property will be set for all NetApp accounts in the subscription and region and only affect non ldap NFSv4 volumes. */
+  nfsV4IDDomain?: string | null;
+  /** LDAP Configuration for the account. */
+  ldapConfiguration?: LdapConfigurationPatch;
+}
+
+export function accountPropertiesPatchSerializer(item: AccountPropertiesPatch): any {
+  return {
+    activeDirectories: !item["activeDirectories"]
+      ? item["activeDirectories"]
+      : activeDirectoryPatchArraySerializer(item["activeDirectories"]),
+    encryption: !item["encryption"]
+      ? item["encryption"]
+      : accountEncryptionPatchSerializer(item["encryption"]),
+    nfsV4IDDomain: item["nfsV4IDDomain"],
+    ldapConfiguration: !item["ldapConfiguration"]
+      ? item["ldapConfiguration"]
+      : ldapConfigurationPatchSerializer(item["ldapConfiguration"]),
+  };
+}
+
+export function activeDirectoryPatchArraySerializer(result: Array<ActiveDirectoryPatch>): any[] {
+  return result.map((item) => {
+    return activeDirectoryPatchSerializer(item);
+  });
+}
+
+/** Active Directory settings for PATCH operations (no default values) */
+export interface ActiveDirectoryPatch {
+  /** Id of the Active Directory */
+  activeDirectoryId?: string | null;
+  /** A domain user account with permission to create machine accounts */
+  username?: string;
+  /** Plain text password of Active Directory domain administrator, value is masked in the response */
+  password?: string;
+  /** Name of the Active Directory domain */
+  domain?: string;
+  /** Comma separated list of DNS server IP addresses (IPv4 only) for the Active Directory domain */
+  dns?: string;
+  /** NetBIOS name of the SMB server. This name will be registered as a computer account in the AD and used to mount volumes */
+  smbServerName?: string;
+  /** The Organizational Unit (OU) within the Windows Active Directory */
+  organizationalUnit?: string;
+  /** The Active Directory site the service will limit Domain Controller discovery to */
+  site?: string;
+  /** Users to be added to the Built-in Backup Operator active directory group. A list of unique usernames without domain specifier */
+  backupOperators?: string[];
+  /** Users to be added to the Built-in Administrators active directory group. A list of unique usernames without domain specifier */
+  administrators?: string[];
+  /** kdc server IP address for the active directory machine. This optional parameter is used only while creating kerberos volume. */
+  kdcIP?: string;
+  /** Name of the active directory machine. This optional parameter is used only while creating kerberos volume */
+  adName?: string;
+  /** When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes. */
+  serverRootCACertificate?: string;
+  /** If enabled, AES encryption will be enabled for SMB communication. */
+  aesEncryption?: boolean;
+  /** Specifies whether or not the LDAP traffic needs to be signed. */
+  ldapSigning?: boolean;
+  /** Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A list of unique usernames without domain specifier */
+  securityOperators?: string[];
+  /** Specifies whether or not the LDAP traffic needs to be secured via TLS. */
+  ldapOverTLS?: boolean;
+  /** If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes. */
+  allowLocalNfsUsersWithLdap?: boolean;
+  /** If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted. */
+  encryptDCConnections?: boolean;
+  /** LDAP Search scope options */
+  ldapSearchScope?: LdapSearchScopeOpt;
+  /** Comma separated list of IPv4 addresses of preferred servers for LDAP client. At most two comma separated IPv4 addresses can be passed. */
+  preferredServersForLdapClient?: string;
+}
+
+export function activeDirectoryPatchSerializer(item: ActiveDirectoryPatch): any {
+  return {
+    activeDirectoryId: item["activeDirectoryId"],
+    username: item["username"],
+    password: item["password"],
+    domain: item["domain"],
+    dns: item["dns"],
+    smbServerName: item["smbServerName"],
+    organizationalUnit: item["organizationalUnit"],
+    site: item["site"],
+    backupOperators: !item["backupOperators"]
+      ? item["backupOperators"]
+      : item["backupOperators"].map((p: any) => {
+          return p;
+        }),
+    administrators: !item["administrators"]
+      ? item["administrators"]
+      : item["administrators"].map((p: any) => {
+          return p;
+        }),
+    kdcIP: item["kdcIP"],
+    adName: item["adName"],
+    serverRootCACertificate: item["serverRootCACertificate"],
+    aesEncryption: item["aesEncryption"],
+    ldapSigning: item["ldapSigning"],
+    securityOperators: !item["securityOperators"]
+      ? item["securityOperators"]
+      : item["securityOperators"].map((p: any) => {
+          return p;
+        }),
+    ldapOverTLS: item["ldapOverTLS"],
+    allowLocalNfsUsersWithLdap: item["allowLocalNfsUsersWithLdap"],
+    encryptDCConnections: item["encryptDCConnections"],
+    ldapSearchScope: !item["ldapSearchScope"]
+      ? item["ldapSearchScope"]
+      : ldapSearchScopeOptSerializer(item["ldapSearchScope"]),
+    preferredServersForLdapClient: item["preferredServersForLdapClient"],
+  };
+}
+
+/** Encryption settings for PATCH operations (no default values) */
+export interface AccountEncryptionPatch {
+  /** The encryption keySource (provider). Possible values (case-insensitive):  Microsoft.NetApp, Microsoft.KeyVault */
+  keySource?: KeySource;
+  /** Properties provided by KeVault. Applicable if keySource is 'Microsoft.KeyVault'. */
+  keyVaultProperties?: KeyVaultPropertiesPatch;
+  /** Identity used to authenticate to KeyVault. Applicable if keySource is 'Microsoft.KeyVault'. */
+  identity?: EncryptionIdentityPatch;
+}
+
+export function accountEncryptionPatchSerializer(item: AccountEncryptionPatch): any {
+  return {
+    keySource: item["keySource"],
+    keyVaultProperties: !item["keyVaultProperties"]
+      ? item["keyVaultProperties"]
+      : keyVaultPropertiesPatchSerializer(item["keyVaultProperties"]),
+    identity: !item["identity"]
+      ? item["identity"]
+      : encryptionIdentityPatchSerializer(item["identity"]),
+  };
+}
+
+/** Properties of key vault for PATCH operations (no required properties) */
+export interface KeyVaultPropertiesPatch {
+  /** The Uri of KeyVault. */
+  keyVaultUri?: string;
+  /** The name of KeyVault key. */
+  keyName?: string;
+  /** The resource ID of KeyVault. */
+  keyVaultResourceId?: string;
+}
+
+export function keyVaultPropertiesPatchSerializer(item: KeyVaultPropertiesPatch): any {
+  return {
+    keyVaultUri: item["keyVaultUri"],
+    keyName: item["keyName"],
+    keyVaultResourceId: item["keyVaultResourceId"],
+  };
+}
+
+/** Identity used to authenticate with key vault for PATCH operations */
+export interface EncryptionIdentityPatch {
+  /** The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has 'UserAssigned'. It should match key of identity.userAssignedIdentities. */
+  userAssignedIdentity?: string;
+  /** ClientId of the multi-tenant Entra ID Application. Used to access cross-tenant keyvaults. */
+  federatedClientId?: string;
+}
+
+export function encryptionIdentityPatchSerializer(item: EncryptionIdentityPatch): any {
+  return {
+    userAssignedIdentity: item["userAssignedIdentity"],
+    federatedClientId: item["federatedClientId"],
+  };
+}
+
+/** LDAP configuration for PATCH operations (no default values) */
+export interface LdapConfigurationPatch {
+  /** Name of the LDAP configuration domain */
+  domain?: string;
+  /** List of LDAP server IP addresses (IPv4 only) for the LDAP domain. */
+  ldapServers?: string[];
+  /** Indicates the secure LDAP mode for encrypting communication between ANF storage and customer LDAP servers. */
+  secureLdapType?: SecureLdapType;
+  /** When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded ldap servers CA certificate. */
+  serverCACertificate?: string;
+  /** The CN host name used while generating the certificate, LDAP Over TLS requires the CN host name to create DNS host entry. */
+  certificateCNHost?: string | null;
+  /** List of DNS server IPv4 addresses for resolving the CN host certificate. This parameter is used when LDAP over TLS is enabled. */
+  dnsServers?: string[];
+  /** Port number for LDAP communication. Default is 389 for LDAP. */
+  ldapPort?: number;
+  /** This specifies the user DN (Distinguished Name), which overrides the base DN for user lookups. */
+  userDN?: string;
+  /** This specifies the group DN (Distinguished Name), which overrides the base DN for group lookups. */
+  groupDN?: string;
+  /** This specifies the netgroup DN (Distinguished Name), which overrides the base DN for netgroup lookups. */
+  netGroupDN?: string;
+  /** The authentication level to use when binding to the LDAP server, defaults to Anonymous. */
+  bindAuthenticationLevel?: BindAuthenticationLevel;
+  /** The distinguished name (DN) to bind as when performing LDAP operations. */
+  bindDN?: string;
+  /** The Azure Key Vault configuration where the Bind DN (Distinguished Name) user password is stored. */
+  bindPasswordAkvConfig?: BindPasswordAkvConfigPatch;
+}
+
+export function ldapConfigurationPatchSerializer(item: LdapConfigurationPatch): any {
+  return {
+    domain: item["domain"],
+    ldapServers: !item["ldapServers"]
+      ? item["ldapServers"]
+      : item["ldapServers"].map((p: any) => {
+          return p;
+        }),
+    secureLdapType: item["secureLdapType"],
+    serverCACertificate: item["serverCACertificate"],
+    certificateCNHost: item["certificateCNHost"],
+    dnsServers: !item["dnsServers"]
+      ? item["dnsServers"]
+      : item["dnsServers"].map((p: any) => {
+          return p;
+        }),
+    ldapPort: item["ldapPort"],
+    userDN: item["userDN"],
+    groupDN: item["groupDN"],
+    netGroupDN: item["netGroupDN"],
+    bindAuthenticationLevel: item["bindAuthenticationLevel"],
+    bindDN: item["bindDN"],
+    bindPasswordAkvConfig: !item["bindPasswordAkvConfig"]
+      ? item["bindPasswordAkvConfig"]
+      : bindPasswordAkvConfigPatchSerializer(item["bindPasswordAkvConfig"]),
+  };
+}
+
+/** The Azure Key Vault configuration where the Bind DN (Distinguished Name) user password is stored. */
+export interface BindPasswordAkvConfigPatch {
+  /** The Azure Key Vault URI where the Bind DN user password is stored. */
+  azureKeyVaultUri?: string;
+  /** The name of the secret in Azure Key Vault that contains the Bind DN user password. */
+  secretName?: string;
+  /** The ARM resource identifier of the user assigned identity used to authenticate with key vault. */
+  userAssignedIdentity?: string;
+}
+
+export function bindPasswordAkvConfigPatchSerializer(item: BindPasswordAkvConfigPatch): any {
+  return {
+    azureKeyVaultUri: item["azureKeyVaultUri"],
+    secretName: item["secretName"],
+    userAssignedIdentity: item["userAssignedIdentity"],
   };
 }
 
@@ -6070,7 +6533,10 @@ export function backupRestoreFilesSerializer(item: BackupRestoreFiles): any {
   };
 }
 
-/** Subvolume Information properties */
+/**
+ * Subvolume Information properties
+ * Deprecated. This resource type will be removed in a future API version.
+ */
 export interface SubvolumeInfo extends ProxyResource {
   /** Subvolume Properties */
   properties?: SubvolumeProperties;
@@ -6589,4 +7055,16 @@ export enum KnownVersions {
   V20251201 = "2025-12-01",
   /** The 2026-01-01 API version. */
   V20260101 = "2026-01-01",
+  /** The 2026-03-01 API version. */
+  V20260301 = "2026-03-01",
+  /** The 2026-04-01 API version. */
+  V20260401 = "2026-04-01",
+  /** The 2026-05-01 API version. */
+  V20260501 = "2026-05-01",
+  /** The 2026-06-01 API version. */
+  V20260601 = "2026-06-01",
+  /** The 2026-07-01 API version. */
+  V20260701 = "2026-07-01",
+  /** The 2026-08-01 API version. */
+  V20260801 = "2026-08-01",
 }

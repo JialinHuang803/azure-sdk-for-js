@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to update an artifact signing account.
  *
  * @summary update an artifact signing account.
- * x-ms-original-file: 2025-10-13/CodeSigningAccounts_Update.json
+ * x-ms-original-file: 2026-05-15-preview/CodeSigningAccounts_Update.json
  */
 async function updateAnArtifactSigningAccount(): Promise<void> {
   const credential = new DefaultAzureCredential();

@@ -54,7 +54,7 @@ export function _listPrivateEndpointConnectionsSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       diskAccessName: diskAccessName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -72,7 +72,9 @@ export async function _listPrivateEndpointConnectionsDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -92,7 +94,7 @@ export function listPrivateEndpointConnections(
     () => _listPrivateEndpointConnectionsSend(context, resourceGroupName, diskAccessName, options),
     _listPrivateEndpointConnectionsDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2025-01-02" },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2026-03-02" },
   );
 }
 
@@ -110,7 +112,7 @@ export function _deleteAPrivateEndpointConnectionSend(
       resourceGroupName: resourceGroupName,
       diskAccessName: diskAccessName,
       privateEndpointConnectionName: privateEndpointConnectionName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -125,7 +127,9 @@ export async function _deleteAPrivateEndpointConnectionDeserialize(
   const expectedStatuses = ["200", "202", "204"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -157,7 +161,7 @@ export function deleteAPrivateEndpointConnection(
           options,
         ),
       resourceLocationConfig: "location",
-      apiVersion: "2025-01-02",
+      apiVersion: "2026-03-02",
     },
   ) as PollerLike<OperationState<void>, void>;
 }
@@ -177,7 +181,7 @@ export function _updateAPrivateEndpointConnectionSend(
       resourceGroupName: resourceGroupName,
       diskAccessName: diskAccessName,
       privateEndpointConnectionName: privateEndpointConnectionName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -197,7 +201,9 @@ export async function _updateAPrivateEndpointConnectionDeserialize(
   const expectedStatuses = ["200", "202", "201"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -231,7 +237,7 @@ export function updateAPrivateEndpointConnection(
           options,
         ),
       resourceLocationConfig: "location",
-      apiVersion: "2025-01-02",
+      apiVersion: "2026-03-02",
     },
   ) as PollerLike<OperationState<PrivateEndpointConnection>, PrivateEndpointConnection>;
 }
@@ -250,7 +256,7 @@ export function _getAPrivateEndpointConnectionSend(
       resourceGroupName: resourceGroupName,
       diskAccessName: diskAccessName,
       privateEndpointConnectionName: privateEndpointConnectionName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -268,7 +274,9 @@ export async function _getAPrivateEndpointConnectionDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -306,7 +314,7 @@ export function _getPrivateLinkResourcesSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       diskAccessName: diskAccessName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -324,7 +332,9 @@ export async function _getPrivateLinkResourcesDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -356,7 +366,7 @@ export function _listSend(
     "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/diskAccesses{?api%2Dversion}",
     {
       subscriptionId: context.subscriptionId,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -372,7 +382,9 @@ export async function _listDeserialize(result: PathUncheckedResponse): Promise<_
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -390,7 +402,7 @@ export function list(
     () => _listSend(context, options),
     _listDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2025-01-02" },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2026-03-02" },
   );
 }
 
@@ -404,7 +416,7 @@ export function _listByResourceGroupSend(
     {
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -422,7 +434,9 @@ export async function _listByResourceGroupDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -441,7 +455,7 @@ export function listByResourceGroup(
     () => _listByResourceGroupSend(context, resourceGroupName, options),
     _listByResourceGroupDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2025-01-02" },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2026-03-02" },
   );
 }
 
@@ -457,7 +471,7 @@ export function _$deleteSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       diskAccessName: diskAccessName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -470,7 +484,9 @@ export async function _$deleteDeserialize(result: PathUncheckedResponse): Promis
   const expectedStatuses = ["200", "202", "204"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -479,11 +495,6 @@ export async function _$deleteDeserialize(result: PathUncheckedResponse): Promis
 }
 
 /** Deletes a disk access resource. */
-/**
- *  @fixme delete is a reserved word that cannot be used as an operation name.
- *         Please add @clientName("clientName") or @clientName("<JS-Specific-Name>", "javascript")
- *         to the operation to override the generated name.
- */
 export function $delete(
   context: Client,
   resourceGroupName: string,
@@ -495,7 +506,7 @@ export function $delete(
     abortSignal: options?.abortSignal,
     getInitialResponse: () => _$deleteSend(context, resourceGroupName, diskAccessName, options),
     resourceLocationConfig: "location",
-    apiVersion: "2025-01-02",
+    apiVersion: "2026-03-02",
   }) as PollerLike<OperationState<void>, void>;
 }
 
@@ -512,7 +523,7 @@ export function _updateSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       diskAccessName: diskAccessName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -530,7 +541,9 @@ export async function _updateDeserialize(result: PathUncheckedResponse): Promise
   const expectedStatuses = ["200", "202", "201"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -552,7 +565,7 @@ export function update(
     getInitialResponse: () =>
       _updateSend(context, resourceGroupName, diskAccessName, diskAccess, options),
     resourceLocationConfig: "location",
-    apiVersion: "2025-01-02",
+    apiVersion: "2026-03-02",
   }) as PollerLike<OperationState<DiskAccess>, DiskAccess>;
 }
 
@@ -569,7 +582,7 @@ export function _createOrUpdateSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       diskAccessName: diskAccessName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -589,7 +602,9 @@ export async function _createOrUpdateDeserialize(
   const expectedStatuses = ["200", "202", "201"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -611,7 +626,7 @@ export function createOrUpdate(
     getInitialResponse: () =>
       _createOrUpdateSend(context, resourceGroupName, diskAccessName, diskAccess, options),
     resourceLocationConfig: "location",
-    apiVersion: "2025-01-02",
+    apiVersion: "2026-03-02",
   }) as PollerLike<OperationState<DiskAccess>, DiskAccess>;
 }
 
@@ -627,7 +642,7 @@ export function _getSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       diskAccessName: diskAccessName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -643,7 +658,9 @@ export async function _getDeserialize(result: PathUncheckedResponse): Promise<Di
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }

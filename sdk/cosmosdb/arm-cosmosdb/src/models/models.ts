@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { areAllPropsUndefined } from "../static-helpers/serialization/check-prop-undefined.js";
-import { serializeRecord } from "../static-helpers/serialization/serialize-record.js";
-import { uint8ArrayToString, stringToUint8Array } from "@azure/core-util";
-
-/**
+/*
  * This file contains only generated model types and their (de)serializers.
  * Disable the following rules for internal models with '_' prefix and deserializers which require 'any' for raw JSON input.
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import { areAllPropsUndefined } from "../static-helpers/serialization/check-prop-undefined.js";
+import { serializeRecord } from "../static-helpers/serialization/serialize-record.js";
+import { uint8ArrayToString, stringToUint8Array } from "@azure/core-util";
+
 /** Result of the request to list Resource Provider operations. It contains a list of operations and a URL link to get the next set of results. */
 export interface _OperationListResult {
   /** List of operations supported by the Resource Provider. */
@@ -144,11 +144,11 @@ export function errorAdditionalInfoDeserializer(item: any): ErrorAdditionalInfo 
 }
 
 /** An Azure Cosmos DB database account. */
-export interface DatabaseAccountGetResults extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+export interface DatabaseAccountGetResults extends ProxyResource {
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedServiceIdentity;
   /** Indicates the type of database account. This can only be set at database account creation. */
@@ -249,10 +249,14 @@ export interface DatabaseAccountGetResults extends Resource {
   enablePerRegionPerPartitionAutoscale?: boolean;
   /** Flag to indicate if All Versions and Deletes Change feed feature is enabled on the account */
   enableAllVersionsAndDeletesChangeFeed?: boolean;
+  /** The configuration for soft delete on the Cosmos DB account. */
+  softDeleteConfiguration?: SoftDeleteConfiguration;
   /** Total dedicated throughput (RU/s) for database account. Represents the sum of all manual provisioned throughput and all autoscale max RU/s across all shared throughput databases and dedicated throughput containers in the account for 1 region. READ ONLY. */
   throughputPoolDedicatedRUs?: number;
   /** When this account is part of a fleetspace with throughput pooling enabled, this is the maximum additional throughput (RU/s) that can be consumed from the pool, summed across all shared throughput databases and dedicated throughput containers in the account for 1 region.  READ ONLY. */
   throughputPoolMaxConsumableRUs?: number;
+  /** Flag to indicate enabling/disabling of hierarchical partition key ID last level enforcement on the account. */
+  enforceHierarchicalPartitionKeyIdLastLevel?: boolean;
 }
 
 export function databaseAccountGetResultsDeserializer(item: any): DatabaseAccountGetResults {
@@ -266,10 +270,10 @@ export function databaseAccountGetResultsDeserializer(item: any): DatabaseAccoun
     ...(!item["properties"]
       ? item["properties"]
       : _databaseAccountGetResultsPropertiesDeserializer(item["properties"])),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentityDeserializer(item["identity"]),
@@ -375,10 +379,14 @@ export interface DatabaseAccountGetProperties {
   enablePerRegionPerPartitionAutoscale?: boolean;
   /** Flag to indicate if All Versions and Deletes Change feed feature is enabled on the account */
   enableAllVersionsAndDeletesChangeFeed?: boolean;
+  /** The configuration for soft delete on the Cosmos DB account. */
+  softDeleteConfiguration?: SoftDeleteConfiguration;
   /** Total dedicated throughput (RU/s) for database account. Represents the sum of all manual provisioned throughput and all autoscale max RU/s across all shared throughput databases and dedicated throughput containers in the account for 1 region. READ ONLY. */
   throughputPoolDedicatedRUs?: number;
   /** When this account is part of a fleetspace with throughput pooling enabled, this is the maximum additional throughput (RU/s) that can be consumed from the pool, summed across all shared throughput databases and dedicated throughput containers in the account for 1 region.  READ ONLY. */
   throughputPoolMaxConsumableRUs?: number;
+  /** Flag to indicate enabling/disabling of hierarchical partition key ID last level enforcement on the account. */
+  enforceHierarchicalPartitionKeyIdLastLevel?: boolean;
 }
 
 export function databaseAccountGetPropertiesDeserializer(item: any): DatabaseAccountGetProperties {
@@ -467,8 +475,12 @@ export function databaseAccountGetPropertiesDeserializer(item: any): DatabaseAcc
     defaultPriorityLevel: item["defaultPriorityLevel"],
     enablePerRegionPerPartitionAutoscale: item["enablePerRegionPerPartitionAutoscale"],
     enableAllVersionsAndDeletesChangeFeed: item["enableAllVersionsAndDeletesChangeFeed"],
+    softDeleteConfiguration: !item["softDeleteConfiguration"]
+      ? item["softDeleteConfiguration"]
+      : softDeleteConfigurationDeserializer(item["softDeleteConfiguration"]),
     throughputPoolDedicatedRUs: item["throughputPoolDedicatedRUs"],
     throughputPoolMaxConsumableRUs: item["throughputPoolMaxConsumableRUs"],
+    enforceHierarchicalPartitionKeyIdLastLevel: item["enforceHierarchicalPartitionKeyIdLastLevel"],
   };
 }
 
@@ -528,11 +540,7 @@ export function consistencyPolicyDeserializer(item: any): ConsistencyPolicy {
 
 /** The default consistency level and configuration settings of the Cosmos DB account. */
 export type DefaultConsistencyLevel =
-  | "Eventual"
-  | "Session"
-  | "BoundedStaleness"
-  | "Strong"
-  | "ConsistentPrefix";
+  "Eventual" | "Session" | "BoundedStaleness" | "Strong" | "ConsistentPrefix";
 
 export function capabilityArraySerializer(result: Array<Capability>): any[] {
   return result.map((item) => {
@@ -1165,9 +1173,7 @@ export function backupPolicyDeserializer(item: any): BackupPolicy {
 
 /** Alias for BackupPolicyUnion */
 export type BackupPolicyUnion =
-  | PeriodicModeBackupPolicy
-  | ContinuousModeBackupPolicy
-  | BackupPolicy;
+  PeriodicModeBackupPolicy | ContinuousModeBackupPolicy | BackupPolicy;
 
 export function backupPolicyUnionSerializer(item: BackupPolicyUnion): any {
   switch (item.type) {
@@ -1396,6 +1402,8 @@ export enum KnownContinuousTier {
   Continuous7Days = "Continuous7Days",
   /** Continuous30Days */
   Continuous30Days = "Continuous30Days",
+  /** Continuous 35 Days backup tier. */
+  Continuous35Days = "Continuous35Days",
 }
 
 /**
@@ -1404,7 +1412,8 @@ export enum KnownContinuousTier {
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
  * **Continuous7Days** \
- * **Continuous30Days**
+ * **Continuous30Days** \
+ * **Continuous35Days**: Continuous 35 Days backup tier.
  */
 export type ContinuousTier = string;
 
@@ -1610,6 +1619,12 @@ export function databaseAccountKeysMetadataDeserializer(item: any): DatabaseAcco
 export interface AccountKeyMetadata {
   /** Generation time in UTC of the key in ISO-8601 format. If the value is missing from the object, it means that the last key regeneration was triggered before 2022-06-18. */
   readonly generationTime?: Date;
+  /**
+   * Approximate time in UTC of the most recent usage of the key in ISO-8601 format.
+   * If the value is missing from the object, it means there is no recorded data plane
+   * usage for this key.
+   */
+  readonly approximateLastUsageTime?: Date;
 }
 
 export function accountKeyMetadataDeserializer(item: any): AccountKeyMetadata {
@@ -1617,6 +1632,9 @@ export function accountKeyMetadataDeserializer(item: any): AccountKeyMetadata {
     generationTime: !item["generationTime"]
       ? item["generationTime"]
       : new Date(item["generationTime"]),
+    approximateLastUsageTime: !item["approximateLastUsageTime"]
+      ? item["approximateLastUsageTime"]
+      : new Date(item["approximateLastUsageTime"]),
   };
 }
 
@@ -1659,6 +1677,32 @@ export enum KnownDefaultPriorityLevel {
  */
 export type DefaultPriorityLevel = string;
 
+/** Configuration for soft delete on the Cosmos DB account. */
+export interface SoftDeleteConfiguration {
+  /** Flag to indicate whether soft delete is enabled on the account. */
+  softDeletionEnabled?: boolean;
+  /** Minimum number of minutes before a soft deleted resource can be permanently deleted. */
+  minMinutesBeforePermanentDeletionAllowed?: number;
+  /** Soft delete retention period in minutes for resources. */
+  softDeleteRetentionPeriodInMinutes?: number;
+}
+
+export function softDeleteConfigurationSerializer(item: SoftDeleteConfiguration): any {
+  return {
+    softDeletionEnabled: item["softDeletionEnabled"],
+    minMinutesBeforePermanentDeletionAllowed: item["minMinutesBeforePermanentDeletionAllowed"],
+    softDeleteRetentionPeriodInMinutes: item["softDeleteRetentionPeriodInMinutes"],
+  };
+}
+
+export function softDeleteConfigurationDeserializer(item: any): SoftDeleteConfiguration {
+  return {
+    softDeletionEnabled: item["softDeletionEnabled"],
+    minMinutesBeforePermanentDeletionAllowed: item["minMinutesBeforePermanentDeletionAllowed"],
+    softDeleteRetentionPeriodInMinutes: item["softDeleteRetentionPeriodInMinutes"],
+  };
+}
+
 /** Identity for the resource. */
 export interface ManagedServiceIdentity {
   /** The principal id of the system assigned identity. This property will only be provided for a system assigned identity. */
@@ -1700,10 +1744,7 @@ export function managedServiceIdentityDeserializer(item: any): ManagedServiceIde
 
 /** The type of identity used for the resource. The type 'SystemAssigned,UserAssigned' includes both an implicitly created identity and a set of user assigned identities. The type 'None' will remove any identities from the service. */
 export type ResourceIdentityType =
-  | "SystemAssigned"
-  | "UserAssigned"
-  | "SystemAssigned,UserAssigned"
-  | "None";
+  "SystemAssigned" | "UserAssigned" | "SystemAssigned,UserAssigned" | "None";
 
 export function components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalpropertiesRecordSerializer(
   item: Record<
@@ -1994,6 +2035,10 @@ export interface DatabaseAccountCreateUpdateParameters extends ARMResourceProper
   enablePerRegionPerPartitionAutoscale?: boolean;
   /** Flag to indicate if All Versions and Deletes Change feed feature is enabled on the account */
   enableAllVersionsAndDeletesChangeFeed?: boolean;
+  /** The configuration for soft delete on the Cosmos DB account. */
+  softDeleteConfiguration?: SoftDeleteConfiguration;
+  /** Flag to indicate enabling/disabling of hierarchical partition key ID last level enforcement on the account. */
+  enforceHierarchicalPartitionKeyIdLastLevel?: boolean;
 }
 
 export function databaseAccountCreateUpdateParametersSerializer(
@@ -2090,6 +2135,10 @@ export interface DatabaseAccountCreateUpdateProperties {
   enablePerRegionPerPartitionAutoscale?: boolean;
   /** Flag to indicate if All Versions and Deletes Change feed feature is enabled on the account */
   enableAllVersionsAndDeletesChangeFeed?: boolean;
+  /** The configuration for soft delete on the Cosmos DB account. */
+  softDeleteConfiguration?: SoftDeleteConfiguration;
+  /** Flag to indicate enabling/disabling of hierarchical partition key ID last level enforcement on the account. */
+  enforceHierarchicalPartitionKeyIdLastLevel?: boolean;
 }
 
 export function databaseAccountCreateUpdatePropertiesSerializer(
@@ -2154,6 +2203,10 @@ export function databaseAccountCreateUpdatePropertiesSerializer(
     defaultPriorityLevel: item["defaultPriorityLevel"],
     enablePerRegionPerPartitionAutoscale: item["enablePerRegionPerPartitionAutoscale"],
     enableAllVersionsAndDeletesChangeFeed: item["enableAllVersionsAndDeletesChangeFeed"],
+    softDeleteConfiguration: !item["softDeleteConfiguration"]
+      ? item["softDeleteConfiguration"]
+      : softDeleteConfigurationSerializer(item["softDeleteConfiguration"]),
+    enforceHierarchicalPartitionKeyIdLastLevel: item["enforceHierarchicalPartitionKeyIdLastLevel"],
   };
 }
 
@@ -2278,6 +2331,10 @@ export interface DatabaseAccountUpdateParameters {
   enablePerRegionPerPartitionAutoscale?: boolean;
   /** Flag to indicate if All Versions and Deletes Change feed feature is enabled on the account */
   enableAllVersionsAndDeletesChangeFeed?: boolean;
+  /** The configuration for soft delete on the Cosmos DB account. */
+  softDeleteConfiguration?: SoftDeleteConfiguration;
+  /** Flag to indicate enabling/disabling of hierarchical partition key ID last level enforcement on the account. */
+  enforceHierarchicalPartitionKeyIdLastLevel?: boolean;
 }
 
 export function databaseAccountUpdateParametersSerializer(
@@ -2325,6 +2382,8 @@ export function databaseAccountUpdateParametersSerializer(
       "defaultPriorityLevel",
       "enablePerRegionPerPartitionAutoscale",
       "enableAllVersionsAndDeletesChangeFeed",
+      "softDeleteConfiguration",
+      "enforceHierarchicalPartitionKeyIdLastLevel",
     ])
       ? undefined
       : _databaseAccountUpdateParametersPropertiesSerializer(item),
@@ -2405,6 +2464,10 @@ export interface DatabaseAccountUpdateProperties {
   enablePerRegionPerPartitionAutoscale?: boolean;
   /** Flag to indicate if All Versions and Deletes Change feed feature is enabled on the account */
   enableAllVersionsAndDeletesChangeFeed?: boolean;
+  /** The configuration for soft delete on the Cosmos DB account. */
+  softDeleteConfiguration?: SoftDeleteConfiguration;
+  /** Flag to indicate enabling/disabling of hierarchical partition key ID last level enforcement on the account. */
+  enforceHierarchicalPartitionKeyIdLastLevel?: boolean;
 }
 
 export function databaseAccountUpdatePropertiesSerializer(
@@ -2464,6 +2527,10 @@ export function databaseAccountUpdatePropertiesSerializer(
     defaultPriorityLevel: item["defaultPriorityLevel"],
     enablePerRegionPerPartitionAutoscale: item["enablePerRegionPerPartitionAutoscale"],
     enableAllVersionsAndDeletesChangeFeed: item["enableAllVersionsAndDeletesChangeFeed"],
+    softDeleteConfiguration: !item["softDeleteConfiguration"]
+      ? item["softDeleteConfiguration"]
+      : softDeleteConfigurationSerializer(item["softDeleteConfiguration"]),
+    enforceHierarchicalPartitionKeyIdLastLevel: item["enforceHierarchicalPartitionKeyIdLastLevel"],
   };
 }
 
@@ -2661,12 +2728,17 @@ export function regionForOnlineOfflineSerializer(item: RegionForOnlineOffline): 
 export interface DatabaseAccountRegenerateKeyParameters {
   /** The access key to regenerate. */
   keyKind: KeyKind;
+  /** Optional flag indicating whether to skip account keys last usage check. */
+  skipAccountKeysLastUsageCheck?: boolean;
 }
 
 export function databaseAccountRegenerateKeyParametersSerializer(
   item: DatabaseAccountRegenerateKeyParameters,
 ): any {
-  return { keyKind: item["keyKind"] };
+  return {
+    keyKind: item["keyKind"],
+    skipAccountKeysLastUsageCheck: item["skipAccountKeysLastUsageCheck"],
+  };
 }
 
 /** The access key to regenerate. */
@@ -3917,11 +3989,11 @@ export function copyJobGetResultsArrayDeserializer(result: Array<CopyJobGetResul
 }
 
 /** An Azure Cosmos DB Graph resource. */
-export interface GraphResourceGetResults extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+export interface GraphResourceGetResults extends ProxyResource {
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedServiceIdentity;
   resource?: GraphResourceGetPropertiesResource;
@@ -3939,10 +4011,10 @@ export function graphResourceGetResultsDeserializer(item: any): GraphResourceGet
     ...(!item["properties"]
       ? item["properties"]
       : _graphResourceGetResultsPropertiesDeserializer(item["properties"])),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentityDeserializer(item["identity"]),
@@ -4118,11 +4190,11 @@ export function graphResourceGetResultsArrayDeserializer(
 }
 
 /** An Azure Cosmos DB SQL database. */
-export interface SqlDatabaseGetResults extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+export interface SqlDatabaseGetResults extends ProxyResource {
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedServiceIdentity;
   resource?: SqlDatabaseGetPropertiesResource;
@@ -4140,10 +4212,10 @@ export function sqlDatabaseGetResultsDeserializer(item: any): SqlDatabaseGetResu
     ...(!item["properties"]
       ? item["properties"]
       : _sqlDatabaseGetResultsPropertiesDeserializer(item["properties"])),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentityDeserializer(item["identity"]),
@@ -4377,11 +4449,11 @@ export function physicalPartitionStorageInfoDeserializer(item: any): PhysicalPar
 }
 
 /** An Azure Cosmos DB resource throughput. */
-export interface ThroughputSettingsGetResults extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+export interface ThroughputSettingsGetResults extends ProxyResource {
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedServiceIdentity;
   resource?: ThroughputSettingsGetPropertiesResource;
@@ -4398,10 +4470,10 @@ export function throughputSettingsGetResultsDeserializer(item: any): ThroughputS
     ...(!item["properties"]
       ? item["properties"]
       : _throughputSettingsGetResultsPropertiesDeserializer(item["properties"])),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentityDeserializer(item["identity"]),
@@ -5082,11 +5154,11 @@ export function clientEncryptionKeyGetResultsArrayDeserializer(
 }
 
 /** An Azure Cosmos DB container. */
-export interface SqlContainerGetResults extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+export interface SqlContainerGetResults extends ProxyResource {
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedServiceIdentity;
   resource?: SqlContainerGetPropertiesResource;
@@ -5104,10 +5176,10 @@ export function sqlContainerGetResultsDeserializer(item: any): SqlContainerGetRe
     ...(!item["properties"]
       ? item["properties"]
       : _sqlContainerGetResultsPropertiesDeserializer(item["properties"])),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentityDeserializer(item["identity"]),
@@ -6536,11 +6608,11 @@ export function continuousBackupInformationDeserializer(item: any): ContinuousBa
 }
 
 /** An Azure Cosmos DB storedProcedure. */
-export interface SqlStoredProcedureGetResults extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+export interface SqlStoredProcedureGetResults extends ProxyResource {
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedServiceIdentity;
   resource?: SqlStoredProcedureGetPropertiesResource;
@@ -6557,10 +6629,10 @@ export function sqlStoredProcedureGetResultsDeserializer(item: any): SqlStoredPr
     ...(!item["properties"]
       ? item["properties"]
       : _sqlStoredProcedureGetResultsPropertiesDeserializer(item["properties"])),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentityDeserializer(item["identity"]),
@@ -6688,11 +6760,11 @@ export function sqlStoredProcedureGetResultsArrayDeserializer(
 }
 
 /** An Azure Cosmos DB userDefinedFunction. */
-export interface SqlUserDefinedFunctionGetResults extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+export interface SqlUserDefinedFunctionGetResults extends ProxyResource {
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedServiceIdentity;
   resource?: SqlUserDefinedFunctionGetPropertiesResource;
@@ -6711,10 +6783,10 @@ export function sqlUserDefinedFunctionGetResultsDeserializer(
     ...(!item["properties"]
       ? item["properties"]
       : _sqlUserDefinedFunctionGetResultsPropertiesDeserializer(item["properties"])),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentityDeserializer(item["identity"]),
@@ -6846,11 +6918,11 @@ export function sqlUserDefinedFunctionGetResultsArrayDeserializer(
 }
 
 /** An Azure Cosmos DB trigger. */
-export interface SqlTriggerGetResults extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+export interface SqlTriggerGetResults extends ProxyResource {
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedServiceIdentity;
   resource?: SqlTriggerGetPropertiesResource;
@@ -6867,10 +6939,10 @@ export function sqlTriggerGetResultsDeserializer(item: any): SqlTriggerGetResult
     ...(!item["properties"]
       ? item["properties"]
       : _sqlTriggerGetResultsPropertiesDeserializer(item["properties"])),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentityDeserializer(item["identity"]),
@@ -7313,11 +7385,11 @@ export function sqlRoleAssignmentGetResultsArrayDeserializer(
 }
 
 /** An Azure Cosmos DB MongoDB database. */
-export interface MongoDBDatabaseGetResults extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+export interface MongoDBDatabaseGetResults extends ProxyResource {
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedServiceIdentity;
   resource?: MongoDBDatabaseGetPropertiesResource;
@@ -7335,10 +7407,10 @@ export function mongoDBDatabaseGetResultsDeserializer(item: any): MongoDBDatabas
     ...(!item["properties"]
       ? item["properties"]
       : _mongoDBDatabaseGetResultsPropertiesDeserializer(item["properties"])),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentityDeserializer(item["identity"]),
@@ -7494,11 +7566,11 @@ export function mongoDBDatabaseGetResultsArrayDeserializer(
 }
 
 /** An Azure Cosmos DB MongoDB collection. */
-export interface MongoDBCollectionGetResults extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+export interface MongoDBCollectionGetResults extends ProxyResource {
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedServiceIdentity;
   resource?: MongoDBCollectionGetPropertiesResource;
@@ -7516,10 +7588,10 @@ export function mongoDBCollectionGetResultsDeserializer(item: any): MongoDBColle
     ...(!item["properties"]
       ? item["properties"]
       : _mongoDBCollectionGetResultsPropertiesDeserializer(item["properties"])),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentityDeserializer(item["identity"]),
@@ -8125,11 +8197,11 @@ export function mongoUserDefinitionGetResultsArrayDeserializer(
 }
 
 /** An Azure Cosmos DB Table. */
-export interface TableGetResults extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+export interface TableGetResults extends ProxyResource {
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedServiceIdentity;
   resource?: TableGetPropertiesResource;
@@ -8147,10 +8219,10 @@ export function tableGetResultsDeserializer(item: any): TableGetResults {
     ...(!item["properties"]
       ? item["properties"]
       : _tableGetResultsPropertiesDeserializer(item["properties"])),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentityDeserializer(item["identity"]),
@@ -8519,11 +8591,11 @@ export function tableRoleAssignmentResourceArrayDeserializer(
 }
 
 /** An Azure Cosmos DB Cassandra keyspace. */
-export interface CassandraKeyspaceGetResults extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+export interface CassandraKeyspaceGetResults extends ProxyResource {
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedServiceIdentity;
   resource?: CassandraKeyspaceGetPropertiesResource;
@@ -8541,10 +8613,10 @@ export function cassandraKeyspaceGetResultsDeserializer(item: any): CassandraKey
     ...(!item["properties"]
       ? item["properties"]
       : _cassandraKeyspaceGetResultsPropertiesDeserializer(item["properties"])),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentityDeserializer(item["identity"]),
@@ -8684,11 +8756,11 @@ export function cassandraKeyspaceGetResultsArrayDeserializer(
 }
 
 /** An Azure Cosmos DB Cassandra table. */
-export interface CassandraTableGetResults extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+export interface CassandraTableGetResults extends ProxyResource {
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedServiceIdentity;
   resource?: CassandraTableGetPropertiesResource;
@@ -8706,10 +8778,10 @@ export function cassandraTableGetResultsDeserializer(item: any): CassandraTableG
     ...(!item["properties"]
       ? item["properties"]
       : _cassandraTableGetResultsPropertiesDeserializer(item["properties"])),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentityDeserializer(item["identity"]),
@@ -8990,11 +9062,11 @@ export function cassandraTableGetResultsArrayDeserializer(
 }
 
 /** An Azure Cosmos DB Cassandra view. */
-export interface CassandraViewGetResults extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+export interface CassandraViewGetResults extends ProxyResource {
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedServiceIdentity;
   resource?: CassandraViewGetPropertiesResource;
@@ -9012,10 +9084,10 @@ export function cassandraViewGetResultsDeserializer(item: any): CassandraViewGet
     ...(!item["properties"]
       ? item["properties"]
       : _cassandraViewGetResultsPropertiesDeserializer(item["properties"])),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentityDeserializer(item["identity"]),
@@ -9388,11 +9460,11 @@ export function cassandraRoleAssignmentResourceArrayDeserializer(
 }
 
 /** An Azure Cosmos DB Gremlin database. */
-export interface GremlinDatabaseGetResults extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+export interface GremlinDatabaseGetResults extends ProxyResource {
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedServiceIdentity;
   resource?: GremlinDatabaseGetPropertiesResource;
@@ -9410,10 +9482,10 @@ export function gremlinDatabaseGetResultsDeserializer(item: any): GremlinDatabas
     ...(!item["properties"]
       ? item["properties"]
       : _gremlinDatabaseGetResultsPropertiesDeserializer(item["properties"])),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentityDeserializer(item["identity"]),
@@ -9569,11 +9641,11 @@ export function gremlinDatabaseGetResultsArrayDeserializer(
 }
 
 /** An Azure Cosmos DB Gremlin graph. */
-export interface GremlinGraphGetResults extends Resource {
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+export interface GremlinGraphGetResults extends ProxyResource {
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedServiceIdentity;
   resource?: GremlinGraphGetPropertiesResource;
@@ -9591,10 +9663,10 @@ export function gremlinGraphGetResultsDeserializer(item: any): GremlinGraphGetRe
     ...(!item["properties"]
       ? item["properties"]
       : _gremlinGraphGetResultsPropertiesDeserializer(item["properties"])),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedServiceIdentityDeserializer(item["identity"]),
@@ -10222,10 +10294,7 @@ export type DataTransferComponent = string;
 export interface BaseCosmosDataTransferDataSourceSink extends DataTransferDataSourceSink {
   remoteAccountName?: string;
   component:
-    | "BaseCosmosDataTransferDataSourceSink"
-    | "CosmosDBCassandra"
-    | "CosmosDBMongo"
-    | "CosmosDBSql";
+    "BaseCosmosDataTransferDataSourceSink" | "CosmosDBCassandra" | "CosmosDBMongo" | "CosmosDBSql";
 }
 
 export function baseCosmosDataTransferDataSourceSinkSerializer(
@@ -10562,12 +10631,16 @@ export interface GarnetClusterResourceProperties {
   readonly endPoints?: GarnetClusterResourcePropertiesEndPointsItem[];
   /** Number of copies of data maintained by the cluster. */
   replicationFactor?: number;
-  /** Number of nodes. */
-  nodeCount?: number;
+  /** Number of shards in the cluster. */
+  shardCount?: number;
   /** Virtual Machine SKU used for clusters. Default value is Standard_DS14_v2. */
   nodeSku?: string;
   /** If the data center has Availability Zone support, apply it to the Virtual Machine ScaleSet that host the garnet cluster virtual machines. */
   availabilityZone?: boolean;
+  /** The authentication method used for the Garnet cluster. */
+  authenticationMethod?: GarnetAuthenticationType;
+  /** Flag to indicate if persistence is enabled for the Garnet cluster. */
+  persistence?: boolean;
   /** Allocation state of the cluster and data center resources. Active implies the virtual machines of the cluster are allocated, deallocated implies virtual machines and resources are deallocated. */
   allocationState?: AllocationState;
   /** Type of the cluster. If set to Production, some operations might not be permitted on cluster. */
@@ -10584,9 +10657,11 @@ export function garnetClusterResourcePropertiesSerializer(
   return {
     subnetId: item["subnetId"],
     replicationFactor: item["replicationFactor"],
-    nodeCount: item["nodeCount"],
+    shardCount: item["shardCount"],
     nodeSku: item["nodeSku"],
     availabilityZone: item["availabilityZone"],
+    authenticationMethod: item["authenticationMethod"],
+    persistence: item["persistence"],
     allocationState: item["allocationState"],
     clusterType: item["clusterType"],
     provisionError: !item["provisionError"]
@@ -10610,9 +10685,11 @@ export function garnetClusterResourcePropertiesDeserializer(
       ? item["endPoints"]
       : garnetClusterResourcePropertiesEndPointsItemArrayDeserializer(item["endPoints"]),
     replicationFactor: item["replicationFactor"],
-    nodeCount: item["nodeCount"],
+    shardCount: item["shardCount"],
     nodeSku: item["nodeSku"],
     availabilityZone: item["availabilityZone"],
+    authenticationMethod: item["authenticationMethod"],
+    persistence: item["persistence"],
     allocationState: item["allocationState"],
     clusterType: item["clusterType"],
     provisionError: !item["provisionError"]
@@ -10680,6 +10757,21 @@ export function garnetClusterResourcePropertiesEndPointsItemDeserializer(
     port: item["port"],
   };
 }
+
+/** The authentication method used for the Garnet cluster. */
+export enum KnownGarnetAuthenticationType {
+  /** Microsoft Entra authentication. */
+  Entra = "Entra",
+}
+
+/**
+ * The authentication method used for the Garnet cluster. \
+ * {@link KnownGarnetAuthenticationType} can be used interchangeably with GarnetAuthenticationType,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **Entra**: Microsoft Entra authentication.
+ */
+export type GarnetAuthenticationType = string;
 
 /** Allocation state of the cluster and data center resources. */
 export enum KnownAllocationState {
@@ -10808,6 +10900,10 @@ export interface GarnetClusterResourcePatchProperties {
   clusterType?: ClusterType;
   /** Extensions to be added or updated on cluster. */
   extensions?: string[];
+  /** The authentication method used for the Garnet cluster. */
+  authenticationMethod?: GarnetAuthenticationType;
+  /** Flag to indicate if persistence is enabled for the Garnet cluster. */
+  persistence?: boolean;
 }
 
 export function garnetClusterResourcePatchPropertiesSerializer(
@@ -10820,6 +10916,8 @@ export function garnetClusterResourcePatchPropertiesSerializer(
       : item["extensions"].map((p: any) => {
           return p;
         }),
+    authenticationMethod: item["authenticationMethod"],
+    persistence: item["persistence"],
   };
 }
 
@@ -10876,11 +10974,15 @@ export function networkSecurityPerimeterConfigurationDeserializer(
 
 /** Network security configuration properties. */
 export interface NetworkSecurityPerimeterConfigurationProperties {
+  /** Provisioning state of the network security perimeter configuration */
   readonly provisioningState?: NetworkSecurityPerimeterConfigurationProvisioningState;
   /** List of provisioning issues, if any */
   readonly provisioningIssues?: ProvisioningIssue[];
+  /** Information about the network security perimeter (NSP) */
   networkSecurityPerimeter?: NetworkSecurityPerimeter;
+  /** Information about the resource association */
   resourceAssociation?: ResourceAssociation;
+  /** Network security perimeter configuration profile */
   profile?: NetworkSecurityProfile;
 }
 
@@ -10906,19 +11008,19 @@ export function networkSecurityPerimeterConfigurationPropertiesDeserializer(
 
 /** Provisioning state of a network security perimeter configuration that is being created or updated. */
 export enum KnownNetworkSecurityPerimeterConfigurationProvisioningState {
-  /** Succeeded */
+  /** The configuration was provisioned successfully. */
   Succeeded = "Succeeded",
-  /** Creating */
+  /** The configuration is being created. */
   Creating = "Creating",
-  /** Updating */
+  /** The configuration is being updated. */
   Updating = "Updating",
-  /** Deleting */
+  /** The configuration is being deleted. */
   Deleting = "Deleting",
-  /** Accepted */
+  /** The configuration request was accepted and provisioning has not started yet. */
   Accepted = "Accepted",
-  /** Failed */
+  /** The configuration failed to provision. */
   Failed = "Failed",
-  /** Canceled */
+  /** The configuration provisioning was canceled. */
   Canceled = "Canceled",
 }
 
@@ -10927,13 +11029,13 @@ export enum KnownNetworkSecurityPerimeterConfigurationProvisioningState {
  * {@link KnownNetworkSecurityPerimeterConfigurationProvisioningState} can be used interchangeably with NetworkSecurityPerimeterConfigurationProvisioningState,
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
- * **Succeeded** \
- * **Creating** \
- * **Updating** \
- * **Deleting** \
- * **Accepted** \
- * **Failed** \
- * **Canceled**
+ * **Succeeded**: The configuration was provisioned successfully. \
+ * **Creating**: The configuration is being created. \
+ * **Updating**: The configuration is being updated. \
+ * **Deleting**: The configuration is being deleted. \
+ * **Accepted**: The configuration request was accepted and provisioning has not started yet. \
+ * **Failed**: The configuration failed to provision. \
+ * **Canceled**: The configuration provisioning was canceled.
  */
 export type NetworkSecurityPerimeterConfigurationProvisioningState = string;
 
@@ -10947,6 +11049,7 @@ export function provisioningIssueArrayDeserializer(result: Array<ProvisioningIss
 export interface ProvisioningIssue {
   /** Name of the issue */
   readonly name?: string;
+  /** Details of the provisioning issue */
   readonly properties?: ProvisioningIssueProperties;
 }
 
@@ -11015,9 +11118,9 @@ export type IssueType = string;
 
 /** Severity of the issue. */
 export enum KnownSeverity {
-  /** Warning */
+  /** The issue is a warning and does not prevent the configuration from being applied. */
   Warning = "Warning",
-  /** Error */
+  /** The issue is an error and prevents the configuration from being applied. */
   Error = "Error",
 }
 
@@ -11026,8 +11129,8 @@ export enum KnownSeverity {
  * {@link KnownSeverity} can be used interchangeably with Severity,
  *  this enum contains the known values that the service supports.
  * ### Known values supported by the service
- * **Warning** \
- * **Error**
+ * **Warning**: The issue is a warning and does not prevent the configuration from being applied. \
+ * **Error**: The issue is an error and prevents the configuration from being applied.
  */
 export type Severity = string;
 
@@ -11041,6 +11144,7 @@ export function accessRuleArrayDeserializer(result: Array<AccessRule>): any[] {
 export interface AccessRule {
   /** Name of the access rule */
   name?: string;
+  /** Properties of the access rule */
   properties?: AccessRuleProperties;
 }
 
@@ -11055,6 +11159,7 @@ export function accessRuleDeserializer(item: any): AccessRule {
 
 /** Properties of Access Rule */
 export interface AccessRuleProperties {
+  /** Direction of the access rule */
   direction?: AccessRuleDirection;
   /** Address prefixes in the CIDR format for inbound rules */
   addressPrefixes?: string[];
@@ -11174,6 +11279,7 @@ export function networkSecurityPerimeterDeserializer(item: any): NetworkSecurity
 export interface ResourceAssociation {
   /** Name of the resource association */
   name?: string;
+  /** Access mode of the resource association */
   accessMode?: ResourceAssociationAccessMode;
 }
 
@@ -11441,6 +11547,304 @@ export function _privateLinkResourceListResultDeserializer(
 export function privateLinkResourceArrayDeserializer(result: Array<PrivateLinkResource>): any[] {
   return result.map((item) => {
     return privateLinkResourceDeserializer(item);
+  });
+}
+
+/** A Azure Cosmos DB soft-deleted database account. */
+export interface SoftDeletedDatabaseAccountGetResult extends ProxyResource {
+  /** The resource-specific properties for this resource. */
+  properties?: SoftDeletedDatabaseAccountProperties;
+}
+
+export function softDeletedDatabaseAccountGetResultDeserializer(
+  item: any,
+): SoftDeletedDatabaseAccountGetResult {
+  return {
+    id: item["id"],
+    name: item["name"],
+    type: item["type"],
+    systemData: !item["systemData"]
+      ? item["systemData"]
+      : systemDataDeserializer(item["systemData"]),
+    properties: !item["properties"]
+      ? item["properties"]
+      : softDeletedDatabaseAccountPropertiesDeserializer(item["properties"]),
+  };
+}
+
+/** The properties of a soft-deleted database account. */
+export interface SoftDeletedDatabaseAccountProperties {
+  /** The name of the database account. */
+  accountName?: string;
+  /** Metadata related to the soft deletion of the database account. */
+  softDeletionMetadata?: SoftDeletionMetadata;
+  /** The soft delete configuration for the database account. */
+  softDeleteConfiguration?: SoftDeleteConfiguration;
+  /** A subset of properties of the underlying database account resource. */
+  resource?: SoftDeletedDatabaseAccountResource;
+}
+
+export function softDeletedDatabaseAccountPropertiesDeserializer(
+  item: any,
+): SoftDeletedDatabaseAccountProperties {
+  return {
+    accountName: item["accountName"],
+    softDeletionMetadata: !item["softDeletionMetadata"]
+      ? item["softDeletionMetadata"]
+      : softDeletionMetadataDeserializer(item["softDeletionMetadata"]),
+    softDeleteConfiguration: !item["softDeleteConfiguration"]
+      ? item["softDeleteConfiguration"]
+      : softDeleteConfigurationDeserializer(item["softDeleteConfiguration"]),
+    resource: !item["resource"]
+      ? item["resource"]
+      : softDeletedDatabaseAccountResourceDeserializer(item["resource"]),
+  };
+}
+
+/** Metadata about the soft deletion of a resource. */
+export interface SoftDeletionMetadata {
+  /** Indicates whether the resource is soft deleted. */
+  isSoftDeleted?: boolean;
+  /** The timestamp when the soft deletion started. */
+  softDeletionStartTimestamp?: number;
+  /** The timestamp when the soft-deleted resource will expire and be permanently deleted. */
+  softDeletionResourceExpirationTimestamp?: number;
+}
+
+export function softDeletionMetadataDeserializer(item: any): SoftDeletionMetadata {
+  return {
+    isSoftDeleted: item["isSoftDeleted"],
+    softDeletionStartTimestamp: item["softDeletionStartTimestamp"],
+    softDeletionResourceExpirationTimestamp: item["softDeletionResourceExpirationTimestamp"],
+  };
+}
+
+/** The database account resource information for a soft-deleted account. */
+export interface SoftDeletedDatabaseAccountResource {
+  /** An array that contains all of the locations enabled for the Cosmos DB account. */
+  locations?: Location[];
+  /** An array that contains the write location(s) for the Cosmos DB account. */
+  writeLocations?: Location[];
+  /** An array that contains the read locations enabled for the Cosmos DB account. */
+  readLocations?: Location[];
+}
+
+export function softDeletedDatabaseAccountResourceDeserializer(
+  item: any,
+): SoftDeletedDatabaseAccountResource {
+  return {
+    locations: !item["locations"]
+      ? item["locations"]
+      : locationArrayDeserializer(item["locations"]),
+    writeLocations: !item["writeLocations"]
+      ? item["writeLocations"]
+      : locationArrayDeserializer(item["writeLocations"]),
+    readLocations: !item["readLocations"]
+      ? item["readLocations"]
+      : locationArrayDeserializer(item["readLocations"]),
+  };
+}
+
+/** The List operation response, that contains the soft-deleted database accounts and their properties. */
+export interface SoftDeletedDatabaseAccountsListResult {
+  /** The SoftDeletedDatabaseAccountGetResult items on this page */
+  value: SoftDeletedDatabaseAccountGetResult[];
+  /** The link to the next page of items */
+  nextLink?: string;
+}
+
+export function softDeletedDatabaseAccountsListResultDeserializer(
+  item: any,
+): SoftDeletedDatabaseAccountsListResult {
+  return {
+    value: softDeletedDatabaseAccountGetResultArrayDeserializer(item["value"]),
+    nextLink: item["nextLink"],
+  };
+}
+
+export function softDeletedDatabaseAccountGetResultArrayDeserializer(
+  result: Array<SoftDeletedDatabaseAccountGetResult>,
+): any[] {
+  return result.map((item) => {
+    return softDeletedDatabaseAccountGetResultDeserializer(item);
+  });
+}
+
+/** An Azure Cosmos DB soft-deleted SQL database. */
+export interface SoftDeletedSqlDatabaseGetResult extends ProxyResource {
+  /** The resource-specific properties for this resource. */
+  properties?: SoftDeletedSqlDatabaseProperties;
+}
+
+export function softDeletedSqlDatabaseGetResultDeserializer(
+  item: any,
+): SoftDeletedSqlDatabaseGetResult {
+  return {
+    id: item["id"],
+    name: item["name"],
+    type: item["type"],
+    systemData: !item["systemData"]
+      ? item["systemData"]
+      : systemDataDeserializer(item["systemData"]),
+    properties: !item["properties"]
+      ? item["properties"]
+      : softDeletedSqlDatabasePropertiesDeserializer(item["properties"]),
+  };
+}
+
+/** The properties of a soft-deleted SQL database. */
+export interface SoftDeletedSqlDatabaseProperties {
+  /** Metadata related to the soft deletion of the SQL database. */
+  softDeletionMetadata?: SoftDeletionMetadata;
+  /** The resource information for the soft-deleted SQL database. */
+  resource?: SoftDeletedSqlDatabaseResource;
+}
+
+export function softDeletedSqlDatabasePropertiesDeserializer(
+  item: any,
+): SoftDeletedSqlDatabaseProperties {
+  return {
+    softDeletionMetadata: !item["softDeletionMetadata"]
+      ? item["softDeletionMetadata"]
+      : softDeletionMetadataDeserializer(item["softDeletionMetadata"]),
+    resource: !item["resource"]
+      ? item["resource"]
+      : softDeletedSqlDatabaseResourceDeserializer(item["resource"]),
+  };
+}
+
+/** Cosmos DB SQL database resource object */
+export interface SoftDeletedSqlDatabaseResource {
+  /** Name of the Cosmos DB SQL database */
+  id: string;
+  /** A system generated property. A unique identifier. */
+  readonly rid?: string;
+}
+
+export function softDeletedSqlDatabaseResourceDeserializer(
+  item: any,
+): SoftDeletedSqlDatabaseResource {
+  return {
+    id: item["id"],
+    rid: item["_rid"],
+  };
+}
+
+/** The List operation response, that contains the soft-deleted SQL databases and their properties. */
+export interface SoftDeletedSqlDatabasesListResult {
+  /** The SoftDeletedSqlDatabaseGetResult items on this page */
+  value: SoftDeletedSqlDatabaseGetResult[];
+  /** The link to the next page of items */
+  nextLink?: string;
+}
+
+export function softDeletedSqlDatabasesListResultDeserializer(
+  item: any,
+): SoftDeletedSqlDatabasesListResult {
+  return {
+    value: softDeletedSqlDatabaseGetResultArrayDeserializer(item["value"]),
+    nextLink: item["nextLink"],
+  };
+}
+
+export function softDeletedSqlDatabaseGetResultArrayDeserializer(
+  result: Array<SoftDeletedSqlDatabaseGetResult>,
+): any[] {
+  return result.map((item) => {
+    return softDeletedSqlDatabaseGetResultDeserializer(item);
+  });
+}
+
+/** An Azure Cosmos DB soft-deleted SQL container. */
+export interface SoftDeletedSqlContainerGetResult extends ProxyResource {
+  /** The resource-specific properties for this resource. */
+  properties?: SoftDeletedSqlContainerProperties;
+}
+
+export function softDeletedSqlContainerGetResultDeserializer(
+  item: any,
+): SoftDeletedSqlContainerGetResult {
+  return {
+    id: item["id"],
+    name: item["name"],
+    type: item["type"],
+    systemData: !item["systemData"]
+      ? item["systemData"]
+      : systemDataDeserializer(item["systemData"]),
+    properties: !item["properties"]
+      ? item["properties"]
+      : softDeletedSqlContainerPropertiesDeserializer(item["properties"]),
+  };
+}
+
+/** The properties of a soft-deleted SQL container. */
+export interface SoftDeletedSqlContainerProperties {
+  /** Metadata related to the soft deletion of the SQL container. */
+  softDeletionMetadata?: SoftDeletionMetadata;
+  /** The resource information for the soft-deleted SQL container. */
+  resource?: SoftDeletedSqlContainerResource;
+}
+
+export function softDeletedSqlContainerPropertiesDeserializer(
+  item: any,
+): SoftDeletedSqlContainerProperties {
+  return {
+    softDeletionMetadata: !item["softDeletionMetadata"]
+      ? item["softDeletionMetadata"]
+      : softDeletionMetadataDeserializer(item["softDeletionMetadata"]),
+    resource: !item["resource"]
+      ? item["resource"]
+      : softDeletedSqlContainerResourceDeserializer(item["resource"]),
+  };
+}
+
+/** Cosmos DB SQL container resource object */
+export interface SoftDeletedSqlContainerResource {
+  /** Name of the Cosmos DB SQL container */
+  id: string;
+  /** A system generated property. A unique identifier. */
+  readonly rid?: string;
+  /** The configuration of the partition key to be used for partitioning data into multiple partitions */
+  partitionKey?: ContainerPartitionKey;
+  /** Default time to live */
+  defaultTtl?: number;
+}
+
+export function softDeletedSqlContainerResourceDeserializer(
+  item: any,
+): SoftDeletedSqlContainerResource {
+  return {
+    id: item["id"],
+    rid: item["_rid"],
+    partitionKey: !item["partitionKey"]
+      ? item["partitionKey"]
+      : containerPartitionKeyDeserializer(item["partitionKey"]),
+    defaultTtl: item["defaultTtl"],
+  };
+}
+
+/** The List operation response, that contains the soft-deleted SQL containers and their properties. */
+export interface SoftDeletedSqlContainersListResult {
+  /** The SoftDeletedSqlContainerGetResult items on this page */
+  value: SoftDeletedSqlContainerGetResult[];
+  /** The link to the next page of items */
+  nextLink?: string;
+}
+
+export function softDeletedSqlContainersListResultDeserializer(
+  item: any,
+): SoftDeletedSqlContainersListResult {
+  return {
+    value: softDeletedSqlContainerGetResultArrayDeserializer(item["value"]),
+    nextLink: item["nextLink"],
+  };
+}
+
+export function softDeletedSqlContainerGetResultArrayDeserializer(
+  result: Array<SoftDeletedSqlContainerGetResult>,
+): any[] {
+  return result.map((item) => {
+    return softDeletedSqlContainerGetResultDeserializer(item);
   });
 }
 
@@ -11834,13 +12238,13 @@ export function locationGetResultArrayDeserializer(result: Array<LocationGetResu
 }
 
 /** Representation of a managed Cassandra cluster. */
-export interface ClusterResource extends Resource {
+export interface ClusterResource extends ProxyResource {
   /** Properties of a managed Cassandra cluster. */
   properties?: ClusterResourceProperties;
-  /** Resource tags. */
-  tags?: Record<string, string>;
-  /** The geo-location where the resource lives */
+  /** The location of the resource group to which the resource belongs. */
   location?: string;
+  /** Tags are a list of key-value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater than 128 characters and value no greater than 256 characters. For example, the default experience for a template type is set with \"defaultExperience\": \"Cassandra\". Current \"defaultExperience\" values also include \"Table\", \"Graph\", \"DocumentDB\", and \"MongoDB\". */
+  tags?: Record<string, string>;
   /** Identity for the resource. */
   identity?: ManagedCassandraManagedServiceIdentity;
 }
@@ -11850,8 +12254,8 @@ export function clusterResourceSerializer(item: ClusterResource): any {
     properties: !item["properties"]
       ? item["properties"]
       : clusterResourcePropertiesSerializer(item["properties"]),
-    tags: item["tags"],
     location: item["location"],
+    tags: item["tags"],
     identity: !item["identity"]
       ? item["identity"]
       : managedCassandraManagedServiceIdentitySerializer(item["identity"]),
@@ -11869,10 +12273,10 @@ export function clusterResourceDeserializer(item: any): ClusterResource {
     properties: !item["properties"]
       ? item["properties"]
       : clusterResourcePropertiesDeserializer(item["properties"]),
+    location: item["location"],
     tags: !item["tags"]
       ? item["tags"]
       : Object.fromEntries(Object.entries(item["tags"]).map(([k, p]: [string, any]) => [k, p])),
-    location: item["location"],
     identity: !item["identity"]
       ? item["identity"]
       : managedCassandraManagedServiceIdentityDeserializer(item["identity"]),
@@ -15248,12 +15652,15 @@ export function fleetResourcePropertiesDeserializer(item: any): FleetResourcePro
 
 /** Represents a fleet resource for updates. */
 export interface FleetResourceUpdate {
+  /** Resource tags. */
+  tags?: Record<string, string>;
   /** A provisioning state of the Fleet. */
   readonly provisioningState?: Status;
 }
 
 export function fleetResourceUpdateSerializer(item: FleetResourceUpdate): any {
   return {
+    tags: item["tags"],
     properties: areAllPropsUndefined(item, [])
       ? undefined
       : _fleetResourceUpdatePropertiesSerializer(item),
@@ -15717,10 +16124,30 @@ export function fleetspaceAccountResourceArrayDeserializer(
   });
 }
 
+/** The kind of soft delete action to perform. */
+export enum KnownSoftDeleteActionKind {
+  /** Restores the soft-deleted resource to active/online state. */
+  RestoreSoftDeletedResource = "RestoreSoftDeletedResource",
+  /** Permanently deletes the soft-deleted resource. */
+  PermanentDeleteResource = "PermanentDeleteResource",
+}
+
+/**
+ * The kind of soft delete action to perform. \
+ * {@link KnownSoftDeleteActionKind} can be used interchangeably with SoftDeleteActionKind,
+ *  this enum contains the known values that the service supports.
+ * ### Known values supported by the service
+ * **RestoreSoftDeletedResource**: Restores the soft-deleted resource to active\/online state. \
+ * **PermanentDeleteResource**: Permanently deletes the soft-deleted resource.
+ */
+export type SoftDeleteActionKind = string;
+
 /** The available API versions. */
 export enum KnownVersions {
-  /** The 2025-05-01-preview API version. */
-  V20251101Preview = "2025-11-01-preview",
+  /** The 2026-03-15 API version. */
+  V20260315 = "2026-03-15",
+  /** The 2026-04-01-preview API version. */
+  V20260401Preview = "2026-04-01-preview",
 }
 
 export function _privateEndpointConnectionPropertiesSerializer(
@@ -15841,8 +16268,12 @@ export function _databaseAccountGetResultsPropertiesDeserializer(item: any) {
     defaultPriorityLevel: item["defaultPriorityLevel"],
     enablePerRegionPerPartitionAutoscale: item["enablePerRegionPerPartitionAutoscale"],
     enableAllVersionsAndDeletesChangeFeed: item["enableAllVersionsAndDeletesChangeFeed"],
+    softDeleteConfiguration: !item["softDeleteConfiguration"]
+      ? item["softDeleteConfiguration"]
+      : softDeleteConfigurationDeserializer(item["softDeleteConfiguration"]),
     throughputPoolDedicatedRUs: item["throughputPoolDedicatedRUs"],
     throughputPoolMaxConsumableRUs: item["throughputPoolMaxConsumableRUs"],
+    enforceHierarchicalPartitionKeyIdLastLevel: item["enforceHierarchicalPartitionKeyIdLastLevel"],
   };
 }
 
@@ -15908,6 +16339,10 @@ export function _databaseAccountCreateUpdateParametersPropertiesSerializer(
     defaultPriorityLevel: item["defaultPriorityLevel"],
     enablePerRegionPerPartitionAutoscale: item["enablePerRegionPerPartitionAutoscale"],
     enableAllVersionsAndDeletesChangeFeed: item["enableAllVersionsAndDeletesChangeFeed"],
+    softDeleteConfiguration: !item["softDeleteConfiguration"]
+      ? item["softDeleteConfiguration"]
+      : softDeleteConfigurationSerializer(item["softDeleteConfiguration"]),
+    enforceHierarchicalPartitionKeyIdLastLevel: item["enforceHierarchicalPartitionKeyIdLastLevel"],
   };
 }
 
@@ -15968,6 +16403,10 @@ export function _databaseAccountUpdateParametersPropertiesSerializer(
     defaultPriorityLevel: item["defaultPriorityLevel"],
     enablePerRegionPerPartitionAutoscale: item["enablePerRegionPerPartitionAutoscale"],
     enableAllVersionsAndDeletesChangeFeed: item["enableAllVersionsAndDeletesChangeFeed"],
+    softDeleteConfiguration: !item["softDeleteConfiguration"]
+      ? item["softDeleteConfiguration"]
+      : softDeleteConfigurationSerializer(item["softDeleteConfiguration"]),
+    enforceHierarchicalPartitionKeyIdLastLevel: item["enforceHierarchicalPartitionKeyIdLastLevel"],
   };
 }
 

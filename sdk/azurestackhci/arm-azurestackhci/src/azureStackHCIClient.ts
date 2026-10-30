@@ -11,20 +11,32 @@ import type { ClustersOperations } from "./classic/clusters/index.js";
 import { _getClustersOperations } from "./classic/clusters/index.js";
 import type { DeploymentSettingsOperations } from "./classic/deploymentSettings/index.js";
 import { _getDeploymentSettingsOperations } from "./classic/deploymentSettings/index.js";
-import type { DevicePoolsOperations } from "./classic/devicePools/index.js";
-import { _getDevicePoolsOperations } from "./classic/devicePools/index.js";
 import type { EdgeDeviceJobsOperations } from "./classic/edgeDeviceJobs/index.js";
 import { _getEdgeDeviceJobsOperations } from "./classic/edgeDeviceJobs/index.js";
 import type { EdgeDevicesOperations } from "./classic/edgeDevices/index.js";
 import { _getEdgeDevicesOperations } from "./classic/edgeDevices/index.js";
+import type { EdgeMachineDeploymentSettingsOperations } from "./classic/edgeMachineDeploymentSettings/index.js";
+import { _getEdgeMachineDeploymentSettingsOperations } from "./classic/edgeMachineDeploymentSettings/index.js";
+import type { EdgeMachineDiskJobsOperations } from "./classic/edgeMachineDiskJobs/index.js";
+import { _getEdgeMachineDiskJobsOperations } from "./classic/edgeMachineDiskJobs/index.js";
+import type { EdgeMachineDiskPrivilegedJobsOperations } from "./classic/edgeMachineDiskPrivilegedJobs/index.js";
+import { _getEdgeMachineDiskPrivilegedJobsOperations } from "./classic/edgeMachineDiskPrivilegedJobs/index.js";
+import type { EdgeMachineDisksOperations } from "./classic/edgeMachineDisks/index.js";
+import { _getEdgeMachineDisksOperations } from "./classic/edgeMachineDisks/index.js";
 import type { EdgeMachineJobsOperations } from "./classic/edgeMachineJobs/index.js";
 import { _getEdgeMachineJobsOperations } from "./classic/edgeMachineJobs/index.js";
+import type { EdgeMachineNetworkAdapterJobsOperations } from "./classic/edgeMachineNetworkAdapterJobs/index.js";
+import { _getEdgeMachineNetworkAdapterJobsOperations } from "./classic/edgeMachineNetworkAdapterJobs/index.js";
+import type { EdgeMachineNetworkAdaptersOperations } from "./classic/edgeMachineNetworkAdapters/index.js";
+import { _getEdgeMachineNetworkAdaptersOperations } from "./classic/edgeMachineNetworkAdapters/index.js";
+import type { EdgeMachineSecuritySettingsOperationsOperations } from "./classic/edgeMachineSecuritySettingsOperations/index.js";
+import { _getEdgeMachineSecuritySettingsOperationsOperations } from "./classic/edgeMachineSecuritySettingsOperations/index.js";
+import type { EdgeMachineVolumesOperations } from "./classic/edgeMachineVolumes/index.js";
+import { _getEdgeMachineVolumesOperations } from "./classic/edgeMachineVolumes/index.js";
 import type { EdgeMachinesOperations } from "./classic/edgeMachines/index.js";
 import { _getEdgeMachinesOperations } from "./classic/edgeMachines/index.js";
 import type { ExtensionsOperations } from "./classic/extensions/index.js";
 import { _getExtensionsOperations } from "./classic/extensions/index.js";
-import type { KubernetesVersionsOperations } from "./classic/kubernetesVersions/index.js";
-import { _getKubernetesVersionsOperations } from "./classic/kubernetesVersions/index.js";
 import type { OffersOperations } from "./classic/offers/index.js";
 import { _getOffersOperations } from "./classic/offers/index.js";
 import type { OperationsOperations } from "./classic/operations/index.js";
@@ -33,16 +45,10 @@ import type { OsImagesOperations } from "./classic/osImages/index.js";
 import { _getOsImagesOperations } from "./classic/osImages/index.js";
 import type { OwnershipVouchersOperations } from "./classic/ownershipVouchers/index.js";
 import { _getOwnershipVouchersOperations } from "./classic/ownershipVouchers/index.js";
-import type { PlatformUpdatesOperations } from "./classic/platformUpdates/index.js";
-import { _getPlatformUpdatesOperations } from "./classic/platformUpdates/index.js";
-import type { PublishersOperations } from "./classic/publishers/index.js";
-import { _getPublishersOperations } from "./classic/publishers/index.js";
 import type { SecuritySettingsOperations } from "./classic/securitySettings/index.js";
 import { _getSecuritySettingsOperations } from "./classic/securitySettings/index.js";
 import type { SkusOperations } from "./classic/skus/index.js";
 import { _getSkusOperations } from "./classic/skus/index.js";
-import type { UpdateContentsOperations } from "./classic/updateContents/index.js";
-import { _getUpdateContentsOperations } from "./classic/updateContents/index.js";
 import type { UpdateRunsOperations } from "./classic/updateRuns/index.js";
 import { _getUpdateRunsOperations } from "./classic/updateRuns/index.js";
 import type { UpdateSummariesOperations } from "./classic/updateSummaries/index.js";
@@ -84,17 +90,18 @@ export class AzureStackHCIClient {
     }
 
     options = options ?? {};
-    const prefixFromOptions = options?.userAgentOptions?.userAgentPrefix;
-    const userAgentPrefix = prefixFromOptions
-      ? `${prefixFromOptions} azsdk-js-client`
-      : `azsdk-js-client`;
-    this._client = createAzureStackHCI(credential, subscriptionId ?? "", {
-      ...options,
-      userAgentOptions: { userAgentPrefix },
-    });
+    this._client = createAzureStackHCI(credential, subscriptionId ?? "", options);
     this.pipeline = this._client.pipeline;
     this.updateSummaries = _getUpdateSummariesOperations(this._client);
-    this.devicePools = _getDevicePoolsOperations(this._client);
+    this.edgeMachineDeploymentSettings = _getEdgeMachineDeploymentSettingsOperations(this._client);
+    this.edgeMachineSecuritySettingsOperations =
+      _getEdgeMachineSecuritySettingsOperationsOperations(this._client);
+    this.edgeMachineDiskPrivilegedJobs = _getEdgeMachineDiskPrivilegedJobsOperations(this._client);
+    this.edgeMachineDiskJobs = _getEdgeMachineDiskJobsOperations(this._client);
+    this.edgeMachineVolumes = _getEdgeMachineVolumesOperations(this._client);
+    this.edgeMachineDisks = _getEdgeMachineDisksOperations(this._client);
+    this.edgeMachineNetworkAdapterJobs = _getEdgeMachineNetworkAdapterJobsOperations(this._client);
+    this.edgeMachineNetworkAdapters = _getEdgeMachineNetworkAdaptersOperations(this._client);
     this.clusterJobs = _getClusterJobsOperations(this._client);
     this.ownershipVouchers = _getOwnershipVouchersOperations(this._client);
     this.edgeMachineJobs = _getEdgeMachineJobsOperations(this._client);
@@ -105,7 +112,6 @@ export class AzureStackHCIClient {
     this.updateRuns = _getUpdateRunsOperations(this._client);
     this.skus = _getSkusOperations(this._client);
     this.securitySettings = _getSecuritySettingsOperations(this._client);
-    this.publishers = _getPublishersOperations(this._client);
     this.extensions = _getExtensionsOperations(this._client);
     this.edgeDevices = _getEdgeDevicesOperations(this._client);
     this.edgeDeviceJobs = _getEdgeDeviceJobsOperations(this._client);
@@ -114,16 +120,27 @@ export class AzureStackHCIClient {
     this.offers = _getOffersOperations(this._client);
     this.arcSettings = _getArcSettingsOperations(this._client);
     this.operations = _getOperationsOperations(this._client);
-    this.updateContents = _getUpdateContentsOperations(this._client);
     this.osImages = _getOsImagesOperations(this._client);
-    this.platformUpdates = _getPlatformUpdatesOperations(this._client);
-    this.kubernetesVersions = _getKubernetesVersionsOperations(this._client);
   }
 
   /** The operation groups for updateSummaries */
   public readonly updateSummaries: UpdateSummariesOperations;
-  /** The operation groups for devicePools */
-  public readonly devicePools: DevicePoolsOperations;
+  /** The operation groups for edgeMachineDeploymentSettings */
+  public readonly edgeMachineDeploymentSettings: EdgeMachineDeploymentSettingsOperations;
+  /** The operation groups for edgeMachineSecuritySettingsOperations */
+  public readonly edgeMachineSecuritySettingsOperations: EdgeMachineSecuritySettingsOperationsOperations;
+  /** The operation groups for edgeMachineDiskPrivilegedJobs */
+  public readonly edgeMachineDiskPrivilegedJobs: EdgeMachineDiskPrivilegedJobsOperations;
+  /** The operation groups for edgeMachineDiskJobs */
+  public readonly edgeMachineDiskJobs: EdgeMachineDiskJobsOperations;
+  /** The operation groups for edgeMachineVolumes */
+  public readonly edgeMachineVolumes: EdgeMachineVolumesOperations;
+  /** The operation groups for edgeMachineDisks */
+  public readonly edgeMachineDisks: EdgeMachineDisksOperations;
+  /** The operation groups for edgeMachineNetworkAdapterJobs */
+  public readonly edgeMachineNetworkAdapterJobs: EdgeMachineNetworkAdapterJobsOperations;
+  /** The operation groups for edgeMachineNetworkAdapters */
+  public readonly edgeMachineNetworkAdapters: EdgeMachineNetworkAdaptersOperations;
   /** The operation groups for clusterJobs */
   public readonly clusterJobs: ClusterJobsOperations;
   /** The operation groups for ownershipVouchers */
@@ -144,8 +161,6 @@ export class AzureStackHCIClient {
   public readonly skus: SkusOperations;
   /** The operation groups for securitySettings */
   public readonly securitySettings: SecuritySettingsOperations;
-  /** The operation groups for publishers */
-  public readonly publishers: PublishersOperations;
   /** The operation groups for extensions */
   public readonly extensions: ExtensionsOperations;
   /** The operation groups for edgeDevices */
@@ -162,12 +177,6 @@ export class AzureStackHCIClient {
   public readonly arcSettings: ArcSettingsOperations;
   /** The operation groups for operations */
   public readonly operations: OperationsOperations;
-  /** The operation groups for updateContents */
-  public readonly updateContents: UpdateContentsOperations;
   /** The operation groups for osImages */
   public readonly osImages: OsImagesOperations;
-  /** The operation groups for platformUpdates */
-  public readonly platformUpdates: PlatformUpdatesOperations;
-  /** The operation groups for kubernetesVersions */
-  public readonly kubernetesVersions: KubernetesVersionsOperations;
 }

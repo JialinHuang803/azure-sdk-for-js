@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to list certificate profiles under an artifact signing account.
  *
  * @summary list certificate profiles under an artifact signing account.
- * x-ms-original-file: 2025-10-13/CertificateProfiles_ListByCodeSigningAccount.json
+ * x-ms-original-file: 2026-05-15-preview/CertificateProfiles_ListByCodeSigningAccount.json
  */
 async function listCertificateProfilesUnderAnArtifactSigningAccount(): Promise<void> {
   const credential = new DefaultAzureCredential();

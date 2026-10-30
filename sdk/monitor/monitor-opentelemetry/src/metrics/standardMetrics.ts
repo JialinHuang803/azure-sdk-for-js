@@ -49,7 +49,7 @@ export class StandardMetrics {
     this._config = config;
     this._azureExporter = new AzureMonitorMetricExporter(this._config.azureMonitorExporterOptions);
     const metricReaderOptions: PeriodicExportingMetricReaderOptions = {
-      exporter: this._azureExporter as any,
+      exporter: this._azureExporter,
       exportIntervalMillis: options?.collectionInterval || this._collectionInterval,
     };
     this._metricReader = new PeriodicExportingMetricReader(metricReaderOptions);
@@ -83,8 +83,8 @@ export class StandardMetrics {
   /**
    * Shutdown Meter Provider it will return no-op Meters after being called.
    */
-  public shutdown(): void {
-    this._meterProvider.shutdown();
+  public shutdown(): Promise<void> {
+    return this._meterProvider.shutdown();
   }
 
   /**

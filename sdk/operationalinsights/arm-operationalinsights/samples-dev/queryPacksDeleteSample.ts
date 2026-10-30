@@ -3,31 +3,18 @@
 
 import { OperationalInsightsManagementClient } from "@azure/arm-operationalinsights";
 import { DefaultAzureCredential } from "@azure/identity";
-import "dotenv/config";
 
 /**
- * This sample demonstrates how to Deletes a Log Analytics QueryPack.
+ * This sample demonstrates how to deletes a Log Analytics QueryPack.
  *
- * @summary Deletes a Log Analytics QueryPack.
- * x-ms-original-file: specification/operationalinsights/resource-manager/Microsoft.OperationalInsights/OperationalInsights/stable/2025-07-01/examples/QueryPacksDelete.json
+ * @summary deletes a Log Analytics QueryPack.
+ * x-ms-original-file: 2025-07-01/QueryPacksDelete.json
  */
 async function queryPacksDelete(): Promise<void> {
-  const subscriptionId =
-    process.env["OPERATIONALINSIGHTS_SUBSCRIPTION_ID"] ||
-    "86dc51d3-92ed-4d7e-947a-775ea79b4919";
-  const resourceGroupName =
-    process.env["OPERATIONALINSIGHTS_RESOURCE_GROUP"] || "my-resource-group";
-  const queryPackName = "my-querypack";
   const credential = new DefaultAzureCredential();
-  const client = new OperationalInsightsManagementClient(
-    credential,
-    subscriptionId,
-  );
-  const result = await client.queryPacks.delete(
-    resourceGroupName,
-    queryPackName,
-  );
-  console.log(result);
+  const subscriptionId = "86dc51d3-92ed-4d7e-947a-775ea79b4919";
+  const client = new OperationalInsightsManagementClient(credential, subscriptionId);
+  await client.queryPacks.delete("my-resource-group", "my-querypack");
 }
 
 async function main(): Promise<void> {

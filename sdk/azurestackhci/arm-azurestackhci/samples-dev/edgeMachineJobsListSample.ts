@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to list EdgeMachineJob resources by EdgeMachines
  *
  * @summary list EdgeMachineJob resources by EdgeMachines
- * x-ms-original-file: 2026-04-01-preview/EdgeMachineJobs_List_MaximumSet_Gen.json
+ * x-ms-original-file: 2026-10-01/EdgeMachineJobs_List_MaximumSet_Gen.json
  */
 async function edgeMachineJobsListMaximumSet(): Promise<void> {
   const credential = new DefaultAzureCredential();

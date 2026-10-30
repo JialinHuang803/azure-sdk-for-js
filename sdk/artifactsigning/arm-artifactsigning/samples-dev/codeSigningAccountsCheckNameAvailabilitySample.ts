@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to checks if the artifact signing account name is valid and is not already in use.
  *
  * @summary checks if the artifact signing account name is valid and is not already in use.
- * x-ms-original-file: 2025-10-13/CodeSigningAccounts_CheckNameAvailability.json
+ * x-ms-original-file: 2026-05-15-preview/CodeSigningAccounts_CheckNameAvailability.json
  */
 async function checksIfTheArtifactSigningAccountNameIsAvailable(): Promise<void> {
   const credential = new DefaultAzureCredential();

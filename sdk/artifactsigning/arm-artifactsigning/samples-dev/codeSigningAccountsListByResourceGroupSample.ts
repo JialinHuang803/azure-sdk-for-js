@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to lists artifact signing accounts within a resource group.
  *
  * @summary lists artifact signing accounts within a resource group.
- * x-ms-original-file: 2025-10-13/CodeSigningAccounts_ListByResourceGroup.json
+ * x-ms-original-file: 2026-05-15-preview/CodeSigningAccounts_ListByResourceGroup.json
  */
 async function listsArtifactSigningAccountsWithinAResourceGroup(): Promise<void> {
   const credential = new DefaultAzureCredential();

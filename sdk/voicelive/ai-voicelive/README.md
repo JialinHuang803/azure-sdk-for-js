@@ -7,7 +7,7 @@ Use the client library to:
 - Create real-time voice assistants and conversational agents
 - Build speech-to-speech applications with minimal latency
 - Integrate advanced conversational features like noise suppression and echo cancellation
-- Leverage multiple AI models (GPT-4o, GPT-4o-mini, Phi) for different use cases
+- Leverage multiple AI models (GPT-Realtime, GPT-Realtime-Mini, Phi) for different use cases
 - Implement function calling and tool integration for dynamic responses
 - Create avatar-enabled voice interactions with visual components
 
@@ -71,18 +71,19 @@ The service uses session configuration to control various aspects of voice inter
 
 - **Turn Detection**: Configure how the service detects when users start and stop speaking
 - **Audio Processing**: Enable noise suppression and echo cancellation
-- **Voice Selection**: Choose from standard Azure voices, high-definition voices, or custom voices
-- **Model Selection**: Select the AI model (GPT-4o, GPT-4o-mini, Phi variants) that best fits your needs
+- **Voice Selection**: Choose from standard Azure voices, custom voices, avatar-sync voices, or preview Azure realtime native voices
+- **Model Selection**: Select the AI model (GPT-Realtime, GPT-Realtime-Mini, Azure-Realtime, Phi variants) that best fits your needs
 
 ### Models and Capabilities
 
 The VoiceLive API supports multiple AI models with different capabilities:
 
-| Model                          | Description                            | Use Case                          |
-| ------------------------------ | -------------------------------------- | --------------------------------- |
-| `gpt-4o-realtime-preview`      | GPT-4o with real-time audio processing | High-quality conversational AI    |
-| `gpt-4o-mini-realtime-preview` | Lightweight GPT-4o variant             | Fast, efficient interactions      |
-| `phi4-mm-realtime`             | Phi model with multimodal support      | Cost-effective voice applications |
+| Model                | Description                                  | Use Case                          |
+| -------------------- | -------------------------------------------- | --------------------------------- |
+| `gpt-realtime`       | Real-time audio processing model             | High-quality conversational AI    |
+| `gpt-realtime-mini`  | Lightweight real-time model                  | Fast, efficient interactions      |
+| `azure-realtime`     | Azure-native realtime model                 | Native voices and WebRTC scenarios |
+| `phi4-mm-realtime`   | Phi model with multimodal support            | Cost-effective voice applications |
 
 ### Conversational Enhancements
 
@@ -110,7 +111,7 @@ const endpoint = "https://your-resource.cognitiveservices.azure.com";
 const client = new VoiceLiveClient(endpoint, credential);
 
 // Model mode - LLM is the main actor
-const session = await client.startSession("gpt-4o-realtime-preview");
+const session = await client.startSession("gpt-realtime");
 ```
 
 #### Agent Mode (Agent as Main Actor)
@@ -182,6 +183,7 @@ The following sections provide code snippets that cover some of the common tasks
 - [Creating a basic voice assistant](#creating-a-basic-voice-assistant)
 - [Creating an agent-powered voice assistant](#creating-an-agent-powered-voice-assistant)
 - [Configuring session options](#configuring-session-options)
+- [Streaming text input](#streaming-text-input)
 - [Handling real-time events](#handling-real-time-events)
 - [Implementing function calling](#implementing-function-calling)
 
@@ -200,7 +202,7 @@ const endpoint = "https://your-resource.cognitiveservices.azure.com";
 const client = new VoiceLiveClient(endpoint, credential);
 
 // Create and connect a session
-const session = await client.startSession("gpt-4o-mini-realtime-preview");
+const session = await client.startSession("gpt-realtime-mini");
 
 // Configure session for voice conversation
 await session.updateSession({
@@ -213,8 +215,8 @@ await session.updateSession({
   turnDetection: {
     type: "server_vad",
     threshold: 0.5,
-    prefixPaddingMs: 300,
-    silenceDurationMs: 500,
+    prefixPaddingInMs: 300,
+    silenceDurationInMs: 500,
   },
   inputAudioFormat: "pcm16",
   outputAudioFormat: "pcm16",
@@ -271,7 +273,7 @@ import { VoiceLiveClient } from "@azure/ai-voicelive";
 const credential = new DefaultAzureCredential();
 const endpoint = "https://your-resource.cognitiveservices.azure.com";
 const client = new VoiceLiveClient(endpoint, credential);
-const session = await client.startSession("gpt-4o-realtime-preview");
+const session = await client.startSession("gpt-realtime");
 
 // Advanced session configuration
 await session.updateSession({
@@ -285,12 +287,72 @@ await session.updateSession({
   turnDetection: {
     type: "server_vad",
     threshold: 0.6,
-    prefixPaddingMs: 200,
-    silenceDurationMs: 300,
+    prefixPaddingInMs: 200,
+    silenceDurationInMs: 300,
   },
   inputAudioFormat: "pcm16",
   outputAudioFormat: "pcm16",
 });
+```
+
+For preview native voices on the `azure-realtime` model, use the dedicated voice type:
+
+```ts snippet:ReadmeSampleRealtimeNativeVoice
+import { DefaultAzureCredential } from "@azure/identity";
+import { VoiceLiveClient } from "@azure/ai-voicelive";
+
+const credential = new DefaultAzureCredential();
+const endpoint = "https://your-resource.cognitiveservices.azure.com";
+const client = new VoiceLiveClient(endpoint, credential);
+const session = await client.startSession("azure-realtime");
+
+await session.updateSession({
+  voice: {
+    type: "azure-realtime-native",
+    name: "ava",
+  },
+});
+```
+
+### Streaming text input
+
+Instead of sending audio, you can stream text into a conversation item incrementally with `input_text.delta` events and finish with a single `input_text.done` event. This is useful when the text itself is produced token-by-token (for example, forwarded from another model):
+
+```ts snippet:ReadmeSampleStreamInputText
+import { DefaultAzureCredential } from "@azure/identity";
+import { VoiceLiveClient } from "@azure/ai-voicelive";
+
+const credential = new DefaultAzureCredential();
+const endpoint = "https://your-resource.cognitiveservices.azure.com";
+const client = new VoiceLiveClient(endpoint, credential);
+const session = await client.startSession("gpt-realtime-mini");
+
+// Create the conversation item that the streamed text is appended to
+const itemId = "user-message-1";
+await session.addConversationItem({
+  type: "message",
+  role: "user",
+  id: itemId,
+  content: [{ type: "input_text", text: "" }],
+});
+
+// Stream the text in chunks as `input_text.delta` events
+for (const chunk of ["Tell me ", "a fun fact ", "about the ocean."]) {
+  await session.sendEvent({
+    type: "input_text.delta",
+    id: itemId,
+    delta: chunk,
+  });
+}
+
+// Signal that the streamed text is complete with a single `input_text.done` event
+await session.sendEvent({
+  type: "input_text.done",
+  id: itemId,
+});
+
+// Ask the model to respond to the streamed text
+await session.sendEvent({ type: "response.create" });
 ```
 
 ### Handling real-time events
@@ -304,7 +366,7 @@ import { VoiceLiveClient } from "@azure/ai-voicelive";
 const credential = new DefaultAzureCredential();
 const endpoint = "https://your-resource.cognitiveservices.azure.com";
 const client = new VoiceLiveClient(endpoint, credential);
-const session = await client.startSession("gpt-4o-mini-realtime-preview");
+const session = await client.startSession("gpt-realtime-mini");
 
 // Set up event handlers using subscription pattern
 const subscription = session.subscribe({
@@ -320,7 +382,7 @@ const subscription = session.subscribe({
     console.log("Assistant:", event.delta);
   },
 
-  onInputAudioTranscriptionCompleted: async (event, context) => {
+  onConversationItemInputAudioTranscriptionCompleted: async (event, context) => {
     // Handle user speech transcription
     console.log("User said:", event.transcript);
   },
@@ -343,7 +405,7 @@ import { VoiceLiveClient } from "@azure/ai-voicelive";
 const credential = new DefaultAzureCredential();
 const endpoint = "https://your-resource.cognitiveservices.azure.com";
 const client = new VoiceLiveClient(endpoint, credential);
-const session = await client.startSession("gpt-4o-mini-realtime-preview");
+const session = await client.startSession("gpt-realtime-mini");
 
 // Define available functions
 const tools = [
@@ -473,7 +535,7 @@ const { VoiceLiveClient } = require("@azure/ai-voicelive");
 const { DefaultAzureCredential } = require("@azure/identity");
 
 const client = new VoiceLiveClient(endpoint, new DefaultAzureCredential());
-const session = client.createSession("gpt-4o-realtime-preview");
+const session = client.createSession("gpt-realtime");
 await session.connect(); // creates "connect" span
 ```
 
@@ -522,7 +584,7 @@ The SDK sets attributes following [GenAI Semantic Conventions](https://opentelem
 | `az.namespace` | Always `Microsoft.CognitiveServices` |
 | `gen_ai.system` | Always `az.ai.voicelive` |
 | `gen_ai.operation.name` | `connect`, `send`, `recv`, or `close` |
-| `gen_ai.request.model` | The model name (e.g., `gpt-4o-realtime-preview`) |
+| `gen_ai.request.model` | The model name (e.g., `gpt-realtime`) |
 | `gen_ai.voice.session_id` | Voice session ID from `session.created` |
 | `gen_ai.voice.turn_count` | Total completed response turns (connect span) |
 | `gen_ai.voice.interruption_count` | Number of `response.cancel` events (connect span) |

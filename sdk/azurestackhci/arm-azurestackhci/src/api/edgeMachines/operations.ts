@@ -2,19 +2,30 @@
 // Licensed under the MIT License.
 
 import type { AzureStackHCIContext as Client } from "../index.js";
-import type { EdgeMachine, EdgeMachinePatch, _EdgeMachineListResult } from "../../models/models.js";
+import type {
+  EdgeMachine,
+  EdgeMachinePatch,
+  _EdgeMachineListResult,
+  EdgeMachineValidateRequest,
+  EdgeMachineValidateResponse,
+} from "../../models/models.js";
 import {
   errorResponseDeserializer,
   edgeMachineSerializer,
   edgeMachineDeserializer,
   edgeMachinePatchSerializer,
   _edgeMachineListResultDeserializer,
+  edgeMachineValidateRequestSerializer,
+  edgeMachineValidateResponseDeserializer,
 } from "../../models/models.js";
 import type { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
 import { buildPagedAsyncIterator } from "../../static-helpers/pagingHelpers.js";
 import { getLongRunningPoller } from "../../static-helpers/pollingHelpers.js";
 import { expandUrlTemplate } from "../../static-helpers/urlTemplate.js";
 import type {
+  EdgeMachinesRefreshApplicableUpdatesOptionalParams,
+  EdgeMachinesRefreshSecuritySettingsOptionalParams,
+  EdgeMachinesValidateOptionalParams,
   EdgeMachinesListBySubscriptionOptionalParams,
   EdgeMachinesListByResourceGroupOptionalParams,
   EdgeMachinesDeleteOptionalParams,
@@ -26,6 +37,191 @@ import type { StreamableMethod, PathUncheckedResponse } from "@azure-rest/core-c
 import { createRestError, operationOptionsToRequestParameters } from "@azure-rest/core-client";
 import type { PollerLike, OperationState } from "@azure/core-lro";
 
+export function _refreshApplicableUpdatesSend(
+  context: Client,
+  resourceGroupName: string,
+  edgeMachineName: string,
+  options: EdgeMachinesRefreshApplicableUpdatesOptionalParams = { requestOptions: {} },
+): StreamableMethod {
+  const path = expandUrlTemplate(
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AzureStackHCI/edgeMachines/{edgeMachineName}/refreshApplicableUpdates{?api%2Dversion}",
+    {
+      subscriptionId: context.subscriptionId,
+      resourceGroupName: resourceGroupName,
+      edgeMachineName: edgeMachineName,
+      "api%2Dversion": context.apiVersion ?? "2026-10-01",
+    },
+    {
+      allowReserved: options?.requestOptions?.skipUrlEncoding,
+    },
+  );
+  return context.path(path).post({ ...operationOptionsToRequestParameters(options) });
+}
+
+export async function _refreshApplicableUpdatesDeserialize(
+  result: PathUncheckedResponse,
+): Promise<void> {
+  const expectedStatuses = ["202", "204", "200", "201"];
+  if (!expectedStatuses.includes(result.status)) {
+    const error = createRestError(result);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
+
+    throw error;
+  }
+
+  return;
+}
+
+/**
+ * Trigger an on-demand refresh of applicable updates for the edge machine.
+ * Creates or updates the default EdgeMachineUpdate child resource with the latest set of applicable updates.
+ */
+export function refreshApplicableUpdates(
+  context: Client,
+  resourceGroupName: string,
+  edgeMachineName: string,
+  options: EdgeMachinesRefreshApplicableUpdatesOptionalParams = { requestOptions: {} },
+): PollerLike<OperationState<void>, void> {
+  return getLongRunningPoller(
+    context,
+    _refreshApplicableUpdatesDeserialize,
+    ["202", "204", "200", "201"],
+    {
+      updateIntervalInMs: options?.updateIntervalInMs,
+      abortSignal: options?.abortSignal,
+      getInitialResponse: () =>
+        _refreshApplicableUpdatesSend(context, resourceGroupName, edgeMachineName, options),
+      resourceLocationConfig: "location",
+      apiVersion: context.apiVersion ?? "2026-10-01",
+    },
+  ) as PollerLike<OperationState<void>, void>;
+}
+
+export function _refreshSecuritySettingsSend(
+  context: Client,
+  resourceGroupName: string,
+  edgeMachineName: string,
+  options: EdgeMachinesRefreshSecuritySettingsOptionalParams = { requestOptions: {} },
+): StreamableMethod {
+  const path = expandUrlTemplate(
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AzureStackHCI/edgeMachines/{edgeMachineName}/refreshSecuritySettings{?api%2Dversion}",
+    {
+      subscriptionId: context.subscriptionId,
+      resourceGroupName: resourceGroupName,
+      edgeMachineName: edgeMachineName,
+      "api%2Dversion": context.apiVersion ?? "2026-10-01",
+    },
+    {
+      allowReserved: options?.requestOptions?.skipUrlEncoding,
+    },
+  );
+  return context.path(path).post({ ...operationOptionsToRequestParameters(options) });
+}
+
+export async function _refreshSecuritySettingsDeserialize(
+  result: PathUncheckedResponse,
+): Promise<void> {
+  const expectedStatuses = ["202", "204", "200", "201"];
+  if (!expectedStatuses.includes(result.status)) {
+    const error = createRestError(result);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
+
+    throw error;
+  }
+
+  return;
+}
+
+/**
+ * Trigger an on-demand sync of edge machine security settings from Guest Configuration.
+ * Creates the default security settings child resource if it does not already exist.
+ */
+export function refreshSecuritySettings(
+  context: Client,
+  resourceGroupName: string,
+  edgeMachineName: string,
+  options: EdgeMachinesRefreshSecuritySettingsOptionalParams = { requestOptions: {} },
+): PollerLike<OperationState<void>, void> {
+  return getLongRunningPoller(
+    context,
+    _refreshSecuritySettingsDeserialize,
+    ["202", "204", "200", "201"],
+    {
+      updateIntervalInMs: options?.updateIntervalInMs,
+      abortSignal: options?.abortSignal,
+      getInitialResponse: () =>
+        _refreshSecuritySettingsSend(context, resourceGroupName, edgeMachineName, options),
+      resourceLocationConfig: "location",
+      apiVersion: context.apiVersion ?? "2026-10-01",
+    },
+  ) as PollerLike<OperationState<void>, void>;
+}
+
+export function _validateSend(
+  context: Client,
+  resourceGroupName: string,
+  edgeMachineName: string,
+  body: EdgeMachineValidateRequest,
+  options: EdgeMachinesValidateOptionalParams = { requestOptions: {} },
+): StreamableMethod {
+  const path = expandUrlTemplate(
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AzureStackHCI/edgeMachines/{edgeMachineName}/validate{?api%2Dversion}",
+    {
+      subscriptionId: context.subscriptionId,
+      resourceGroupName: resourceGroupName,
+      edgeMachineName: edgeMachineName,
+      "api%2Dversion": context.apiVersion ?? "2026-10-01",
+    },
+    {
+      allowReserved: options?.requestOptions?.skipUrlEncoding,
+    },
+  );
+  return context.path(path).post({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/json",
+    headers: { accept: "application/json", ...options.requestOptions?.headers },
+    body: edgeMachineValidateRequestSerializer(body),
+  });
+}
+
+export async function _validateDeserialize(
+  result: PathUncheckedResponse,
+): Promise<EdgeMachineValidateResponse> {
+  const expectedStatuses = ["200", "202", "201"];
+  if (!expectedStatuses.includes(result.status)) {
+    const error = createRestError(result);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
+
+    throw error;
+  }
+
+  return edgeMachineValidateResponseDeserializer(result.body);
+}
+
+/** A long-running resource action to validate the edge machine. */
+export function validate(
+  context: Client,
+  resourceGroupName: string,
+  edgeMachineName: string,
+  body: EdgeMachineValidateRequest,
+  options: EdgeMachinesValidateOptionalParams = { requestOptions: {} },
+): PollerLike<OperationState<EdgeMachineValidateResponse>, EdgeMachineValidateResponse> {
+  return getLongRunningPoller(context, _validateDeserialize, ["200", "202", "201"], {
+    updateIntervalInMs: options?.updateIntervalInMs,
+    abortSignal: options?.abortSignal,
+    getInitialResponse: () =>
+      _validateSend(context, resourceGroupName, edgeMachineName, body, options),
+    resourceLocationConfig: "location",
+    apiVersion: context.apiVersion ?? "2026-10-01",
+  }) as PollerLike<OperationState<EdgeMachineValidateResponse>, EdgeMachineValidateResponse>;
+}
+
 export function _listBySubscriptionSend(
   context: Client,
   options: EdgeMachinesListBySubscriptionOptionalParams = { requestOptions: {} },
@@ -34,7 +230,7 @@ export function _listBySubscriptionSend(
     "/subscriptions/{subscriptionId}/providers/Microsoft.AzureStackHCI/edgeMachines{?api%2Dversion}",
     {
       subscriptionId: context.subscriptionId,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-10-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -52,7 +248,9 @@ export async function _listBySubscriptionDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -70,11 +268,7 @@ export function listBySubscription(
     () => _listBySubscriptionSend(context, options),
     _listBySubscriptionDeserialize,
     ["200"],
-    {
-      itemName: "value",
-      nextLinkName: "nextLink",
-      apiVersion: context.apiVersion ?? "2026-04-01-preview",
-    },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: context.apiVersion ?? "2026-10-01" },
   );
 }
 
@@ -88,7 +282,7 @@ export function _listByResourceGroupSend(
     {
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-10-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -106,7 +300,9 @@ export async function _listByResourceGroupDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -125,11 +321,7 @@ export function listByResourceGroup(
     () => _listByResourceGroupSend(context, resourceGroupName, options),
     _listByResourceGroupDeserialize,
     ["200"],
-    {
-      itemName: "value",
-      nextLinkName: "nextLink",
-      apiVersion: context.apiVersion ?? "2026-04-01-preview",
-    },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: context.apiVersion ?? "2026-10-01" },
   );
 }
 
@@ -145,7 +337,7 @@ export function _$deleteSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       edgeMachineName: edgeMachineName,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-10-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -158,7 +350,9 @@ export async function _$deleteDeserialize(result: PathUncheckedResponse): Promis
   const expectedStatuses = ["202", "204", "200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -167,11 +361,6 @@ export async function _$deleteDeserialize(result: PathUncheckedResponse): Promis
 }
 
 /** Delete an edge machine. */
-/**
- *  @fixme delete is a reserved word that cannot be used as an operation name.
- *         Please add @clientName("clientName") or @clientName("<JS-Specific-Name>", "javascript")
- *         to the operation to override the generated name.
- */
 export function $delete(
   context: Client,
   resourceGroupName: string,
@@ -183,7 +372,7 @@ export function $delete(
     abortSignal: options?.abortSignal,
     getInitialResponse: () => _$deleteSend(context, resourceGroupName, edgeMachineName, options),
     resourceLocationConfig: "location",
-    apiVersion: context.apiVersion ?? "2026-04-01-preview",
+    apiVersion: context.apiVersion ?? "2026-10-01",
   }) as PollerLike<OperationState<void>, void>;
 }
 
@@ -200,7 +389,7 @@ export function _updateSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       edgeMachineName: edgeMachineName,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-10-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -218,7 +407,9 @@ export async function _updateDeserialize(result: PathUncheckedResponse): Promise
   const expectedStatuses = ["200", "202", "201"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -240,7 +431,7 @@ export function update(
     getInitialResponse: () =>
       _updateSend(context, resourceGroupName, edgeMachineName, properties, options),
     resourceLocationConfig: "location",
-    apiVersion: context.apiVersion ?? "2026-04-01-preview",
+    apiVersion: context.apiVersion ?? "2026-10-01",
   }) as PollerLike<OperationState<EdgeMachine>, EdgeMachine>;
 }
 
@@ -257,7 +448,7 @@ export function _createOrUpdateSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       edgeMachineName: edgeMachineName,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-10-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -277,7 +468,9 @@ export async function _createOrUpdateDeserialize(
   const expectedStatuses = ["200", "201", "202"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -299,7 +492,7 @@ export function createOrUpdate(
     getInitialResponse: () =>
       _createOrUpdateSend(context, resourceGroupName, edgeMachineName, resource, options),
     resourceLocationConfig: "azure-async-operation",
-    apiVersion: context.apiVersion ?? "2026-04-01-preview",
+    apiVersion: context.apiVersion ?? "2026-10-01",
   }) as PollerLike<OperationState<EdgeMachine>, EdgeMachine>;
 }
 
@@ -315,7 +508,7 @@ export function _getSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       edgeMachineName: edgeMachineName,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-10-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -331,7 +524,9 @@ export async function _getDeserialize(result: PathUncheckedResponse): Promise<Ed
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }

@@ -6,11 +6,13 @@
 
 import type { AbortSignalLike } from '@azure/abort-controller';
 import type { ClientOptions } from '@azure-rest/core-client';
+import { isRestError } from '@azure/core-rest-pipeline';
 import type { OperationOptions } from '@azure-rest/core-client';
 import type { OperationState } from '@azure/core-lro';
 import type { PathUncheckedResponse } from '@azure-rest/core-client';
 import type { Pipeline } from '@azure/core-rest-pipeline';
 import type { PollerLike } from '@azure/core-lro';
+import { RestError } from '@azure/core-rest-pipeline';
 import type { TokenCredential } from '@azure/core-auth';
 
 // @public
@@ -24,13 +26,29 @@ export interface AccountEncryption {
 }
 
 // @public
+export interface AccountEncryptionPatch {
+    identity?: EncryptionIdentityPatch;
+    keySource?: KeySource;
+    keyVaultProperties?: KeyVaultPropertiesPatch;
+}
+
+// @public
 export interface AccountProperties {
     activeDirectories?: ActiveDirectory[];
     readonly disableShowmount?: boolean | null;
     encryption?: AccountEncryption;
+    ldapConfiguration?: LdapConfiguration;
     readonly multiAdStatus?: MultiAdStatus;
     nfsV4IDDomain?: string | null;
     readonly provisioningState?: string;
+}
+
+// @public
+export interface AccountPropertiesPatch {
+    activeDirectories?: ActiveDirectoryPatch[];
+    encryption?: AccountEncryptionPatch;
+    ldapConfiguration?: LdapConfigurationPatch;
+    nfsV4IDDomain?: string | null;
 }
 
 // @public
@@ -75,9 +93,15 @@ export interface AccountsOperations {
     getChangeKeyVaultInformation: (resourceGroupName: string, accountName: string, options?: AccountsGetChangeKeyVaultInformationOptionalParams) => PollerLike<OperationState<GetKeyVaultStatusResponse>, GetKeyVaultStatusResponse>;
     list: (resourceGroupName: string, options?: AccountsListOptionalParams) => PagedAsyncIterableIterator<NetAppAccount>;
     listBySubscription: (options?: AccountsListBySubscriptionOptionalParams) => PagedAsyncIterableIterator<NetAppAccount>;
+    refreshLdapBindPassword: (resourceGroupName: string, accountName: string, options?: AccountsRefreshLdapBindPasswordOptionalParams) => PollerLike<OperationState<void>, void>;
     renewCredentials: (resourceGroupName: string, accountName: string, options?: AccountsRenewCredentialsOptionalParams) => PollerLike<OperationState<void>, void>;
     transitionToCmk: (resourceGroupName: string, accountName: string, options?: AccountsTransitionToCmkOptionalParams) => PollerLike<OperationState<void>, void>;
     update: (resourceGroupName: string, accountName: string, body: NetAppAccountPatch, options?: AccountsUpdateOptionalParams) => PollerLike<OperationState<NetAppAccount>, NetAppAccount>;
+}
+
+// @public
+export interface AccountsRefreshLdapBindPasswordOptionalParams extends OperationOptions {
+    updateIntervalInMs?: number;
 }
 
 // @public
@@ -120,6 +144,31 @@ export interface ActiveDirectory {
     smbServerName?: string;
     readonly status?: ActiveDirectoryStatus;
     readonly statusDetails?: string;
+    username?: string;
+}
+
+// @public
+export interface ActiveDirectoryPatch {
+    activeDirectoryId?: string | null;
+    administrators?: string[];
+    adName?: string;
+    aesEncryption?: boolean;
+    allowLocalNfsUsersWithLdap?: boolean;
+    backupOperators?: string[];
+    dns?: string;
+    domain?: string;
+    encryptDCConnections?: boolean;
+    kdcIP?: string;
+    ldapOverTLS?: boolean;
+    ldapSearchScope?: LdapSearchScopeOpt;
+    ldapSigning?: boolean;
+    organizationalUnit?: string;
+    password?: string;
+    preferredServersForLdapClient?: string;
+    securityOperators?: string[];
+    serverRootCACertificate?: string;
+    site?: string;
+    smbServerName?: string;
     username?: string;
 }
 
@@ -399,6 +448,23 @@ export interface BackupVaultsUpdateOptionalParams extends OperationOptions {
 }
 
 // @public
+export type BindAuthenticationLevel = string;
+
+// @public
+export interface BindPasswordAkvConfig {
+    azureKeyVaultUri: string;
+    secretName: string;
+    userAssignedIdentity?: string;
+}
+
+// @public
+export interface BindPasswordAkvConfigPatch {
+    azureKeyVaultUri?: string;
+    secretName?: string;
+    userAssignedIdentity?: string;
+}
+
+// @public
 export interface BreakFileLocksRequest {
     clientIp?: string;
     confirmRunningDisruptiveOperation?: boolean;
@@ -408,6 +474,9 @@ export interface BreakFileLocksRequest {
 export interface BreakReplicationRequest {
     forceBreakReplication?: boolean;
 }
+
+// @public
+export type BreakthroughMode = string;
 
 // @public
 export interface Bucket extends ProxyResource {
@@ -531,6 +600,9 @@ export interface Cache extends TrackedResource {
 }
 
 // @public
+export type CacheFileAccessLogs = string;
+
+// @public
 export type CacheLifeCycleState = string;
 
 // @public
@@ -549,6 +621,7 @@ export interface CacheProperties {
     readonly encryption?: EncryptionState;
     encryptionKeySource: EncryptionKeySource;
     exportPolicy?: CachePropertiesExportPolicy;
+    readonly fileAccessLogs?: CacheFileAccessLogs;
     filePath: string;
     globalFileLocking?: GlobalFileLockingState;
     kerberos?: KerberosState;
@@ -605,8 +678,8 @@ export interface CachesOperations {
     get: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, options?: CachesGetOptionalParams) => Promise<Cache>;
     list: (resourceGroupName: string, accountName: string, poolName: string, options?: CachesListOptionalParams) => PagedAsyncIterableIterator<Cache>;
     listPeeringPassphrases: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, options?: CachesListPeeringPassphrasesOptionalParams) => Promise<PeeringPassphrases>;
-    poolChange: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, body: PoolChangeRequest, options?: CachesPoolChangeOptionalParams) => PollerLike<OperationState<void>, void>;
-    resetSmbPassword: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, options?: CachesResetSmbPasswordOptionalParams) => PollerLike<OperationState<void>, void>;
+    poolChange: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, body: PoolChangeRequest, options?: CachesPoolChangeOptionalParams) => PollerLike<OperationState<Cache>, Cache>;
+    resetSmbPassword: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, options?: CachesResetSmbPasswordOptionalParams) => PollerLike<OperationState<Cache>, Cache>;
     update: (resourceGroupName: string, accountName: string, poolName: string, cacheName: string, body: CacheUpdate, options?: CachesUpdateOptionalParams) => PollerLike<OperationState<Cache>, Cache>;
 }
 
@@ -770,6 +843,12 @@ export interface EncryptionIdentity {
 }
 
 // @public
+export interface EncryptionIdentityPatch {
+    federatedClientId?: string;
+    userAssignedIdentity?: string;
+}
+
+// @public
 export type EncryptionKeySource = string;
 
 // @public
@@ -885,6 +964,8 @@ export interface HourlySchedule {
 // @public
 export type InAvailabilityReasonType = string;
 
+export { isRestError }
+
 // @public
 export type KerberosState = string;
 
@@ -904,6 +985,13 @@ export interface KeyVaultProperties {
     keyVaultResourceId?: string;
     keyVaultUri: string;
     readonly status?: KeyVaultStatus;
+}
+
+// @public
+export interface KeyVaultPropertiesPatch {
+    keyName?: string;
+    keyVaultResourceId?: string;
+    keyVaultUri?: string;
 }
 
 // @public
@@ -951,6 +1039,18 @@ export enum KnownBackupType {
 }
 
 // @public
+export enum KnownBindAuthenticationLevel {
+    Anonymous = "Anonymous",
+    Simple = "Simple"
+}
+
+// @public
+export enum KnownBreakthroughMode {
+    Disabled = "Disabled",
+    Enabled = "Enabled"
+}
+
+// @public
 export enum KnownBucketPatchPermissions {
     ReadOnly = "ReadOnly",
     ReadWrite = "ReadWrite"
@@ -960,6 +1060,12 @@ export enum KnownBucketPatchPermissions {
 export enum KnownBucketPermissions {
     ReadOnly = "ReadOnly",
     ReadWrite = "ReadWrite"
+}
+
+// @public
+export enum KnownCacheFileAccessLogs {
+    Disabled = "Disabled",
+    Enabled = "Enabled"
 }
 
 // @public
@@ -1178,6 +1284,7 @@ export enum KnownMultiAdStatus {
 // @public
 export enum KnownNetAppProvisioningState {
     Accepted = "Accepted",
+    Canceled = "Canceled",
     Creating = "Creating",
     Deleting = "Deleting",
     Failed = "Failed",
@@ -1283,6 +1390,12 @@ export enum KnownReplicationType {
 }
 
 // @public
+export enum KnownSecureLdapType {
+    LdapOverTLS = "LdapOverTLS",
+    None = "None"
+}
+
+// @public
 export enum KnownSecurityStyle {
     Ntfs = "ntfs",
     Unix = "unix"
@@ -1321,7 +1434,13 @@ export enum KnownVersions {
     V20250801 = "2025-08-01",
     V20250901 = "2025-09-01",
     V20251201 = "2025-12-01",
-    V20260101 = "2026-01-01"
+    V20260101 = "2026-01-01",
+    V20260301 = "2026-03-01",
+    V20260401 = "2026-04-01",
+    V20260501 = "2026-05-01",
+    V20260601 = "2026-06-01",
+    V20260701 = "2026-07-01",
+    V20260801 = "2026-08-01"
 }
 
 // @public
@@ -1428,6 +1547,40 @@ export enum KnownVolumeStorageToNetworkProximity {
 }
 
 // @public
+export interface LdapConfiguration {
+    bindAuthenticationLevel?: BindAuthenticationLevel;
+    bindDN?: string;
+    bindPasswordAkvConfig?: BindPasswordAkvConfig;
+    certificateCNHost?: string | null;
+    dnsServers?: string[];
+    domain?: string;
+    groupDN?: string;
+    ldapPort?: number;
+    ldapServers?: string[];
+    netGroupDN?: string;
+    secureLdapType?: SecureLdapType;
+    serverCACertificate?: string;
+    userDN?: string;
+}
+
+// @public
+export interface LdapConfigurationPatch {
+    bindAuthenticationLevel?: BindAuthenticationLevel;
+    bindDN?: string;
+    bindPasswordAkvConfig?: BindPasswordAkvConfigPatch;
+    certificateCNHost?: string | null;
+    dnsServers?: string[];
+    domain?: string;
+    groupDN?: string;
+    ldapPort?: number;
+    ldapServers?: string[];
+    netGroupDN?: string;
+    secureLdapType?: SecureLdapType;
+    serverCACertificate?: string;
+    userDN?: string;
+}
+
+// @public
 export interface LdapSearchScopeOpt {
     groupDN?: string;
     groupMembershipFilter?: string;
@@ -1527,13 +1680,9 @@ export interface NetAppAccount extends TrackedResource {
 
 // @public
 export interface NetAppAccountPatch {
-    readonly id?: string;
     identity?: ManagedServiceIdentity;
-    location?: string;
-    readonly name?: string;
-    properties?: AccountProperties;
+    properties?: AccountPropertiesPatch;
     tags?: Record<string, string>;
-    readonly type?: string;
 }
 
 // @public (undocumented)
@@ -2047,6 +2196,8 @@ export interface ResourceNameAvailabilityRequest {
     type: CheckNameResourceTypes;
 }
 
+export { RestError }
+
 // @public
 export function restorePoller<TResponse extends PathUncheckedResponse, TResult>(client: NetAppManagementClient, serializedState: string, sourceOperation: (...args: any[]) => PollerLike<OperationState<TResult>, TResult>, options?: RestorePollerOptions<TResult>): PollerLike<OperationState<TResult>, TResult>;
 
@@ -2066,6 +2217,9 @@ export interface RestoreStatus {
     readonly totalTransferBytes?: number;
     readonly unhealthyReason?: string;
 }
+
+// @public
+export type SecureLdapType = string;
 
 // @public
 export type SecurityStyle = string;
@@ -2525,6 +2679,7 @@ export interface VolumeProperties {
     avsDataStore?: AvsDataStore;
     backupId?: string | null;
     readonly baremetalTenantId?: string;
+    breakthroughMode?: BreakthroughMode;
     capacityPoolResourceId?: string;
     readonly cloneProgress?: number | null;
     coolAccess?: boolean;

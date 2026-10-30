@@ -1,14 +1,31 @@
 # Release History
 
-## 4.10.4 (Unreleased)
+## 4.11.0 (2026-10-27)
 
 ### Features Added
 
-### Breaking Changes
+- Added support for service API version `2026-04-01`, which is now the default.
+- Includes the experimental `platformManaged` certificate policy property introduced in `4.11.0-beta.1`. This property is for internal Azure Key Vault usage only; requests using it currently fail and its use is not recommended.
 
 ### Bugs Fixed
 
+- Fixed `updateCertificatePolicy` returning a policy built from an unassigned
+  variable instead of the updated policy returned by the service.
+  [#39461](https://github.com/Azure/azure-sdk-for-js/pull/39461)
+
 ### Other Changes
+
+- Regenerated the internal client from the stable `2026-04-01` specification.
+
+## 4.11.0-beta.1 (2026-06-04)
+
+### Features Added
+
+- Added an experimental PlatformManaged property on CertificatePolicy for Azure Key Vault internal usage. Any calls using this property will fail and it is not recommended to be used at this point. [#38579](https://github.com/Azure/azure-sdk-for-js/pull/38579)
+
+### Other Changes
+
+- Upgraded to API service version `2026-03-01-preview`
 
 ## 4.10.3 (2026-04-09)
 

@@ -3,33 +3,18 @@
 
 import { OperationalInsightsManagementClient } from "@azure/arm-operationalinsights";
 import { DefaultAzureCredential } from "@azure/identity";
-import "dotenv/config";
 
 /**
- * This sample demonstrates how to Deletes a data source instance.
+ * This sample demonstrates how to deletes a data source instance.
  *
- * @summary Deletes a data source instance.
- * x-ms-original-file: specification/operationalinsights/resource-manager/Microsoft.OperationalInsights/OperationalInsights/stable/2025-07-01/examples/DataSourcesDelete.json
+ * @summary deletes a data source instance.
+ * x-ms-original-file: 2025-07-01/DataSourcesDelete.json
  */
 async function dataSourcesDelete(): Promise<void> {
-  const subscriptionId =
-    process.env["OPERATIONALINSIGHTS_SUBSCRIPTION_ID"] ||
-    "00000000-0000-0000-0000-00000000000";
-  const resourceGroupName =
-    process.env["OPERATIONALINSIGHTS_RESOURCE_GROUP"] || "OIAutoRest5123";
-  const workspaceName = "AzTest9724";
-  const dataSourceName = "AzTestDS774";
   const credential = new DefaultAzureCredential();
-  const client = new OperationalInsightsManagementClient(
-    credential,
-    subscriptionId,
-  );
-  const result = await client.dataSources.delete(
-    resourceGroupName,
-    workspaceName,
-    dataSourceName,
-  );
-  console.log(result);
+  const subscriptionId = "00000000-0000-0000-0000-000000000000";
+  const client = new OperationalInsightsManagementClient(credential, subscriptionId);
+  await client.dataSources.delete("OIAutoRest5123", "AzTest9724", "AzTestDS774");
 }
 
 async function main(): Promise<void> {

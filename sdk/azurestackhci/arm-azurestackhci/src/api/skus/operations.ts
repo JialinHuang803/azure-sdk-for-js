@@ -31,7 +31,7 @@ export function _listByOfferSend(
       clusterName: clusterName,
       publisherName: publisherName,
       offerName: offerName,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-10-01",
       "%24expand": options?.expand,
     },
     {
@@ -48,7 +48,9 @@ export async function _listByOfferDeserialize(result: PathUncheckedResponse): Pr
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -71,11 +73,7 @@ export function listByOffer(
       _listByOfferSend(context, resourceGroupName, clusterName, publisherName, offerName, options),
     _listByOfferDeserialize,
     ["200"],
-    {
-      itemName: "value",
-      nextLinkName: "nextLink",
-      apiVersion: context.apiVersion ?? "2026-04-01-preview",
-    },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: context.apiVersion ?? "2026-10-01" },
   );
 }
 
@@ -97,7 +95,7 @@ export function _getSend(
       publisherName: publisherName,
       offerName: offerName,
       skuName: skuName,
-      "api%2Dversion": context.apiVersion ?? "2026-04-01-preview",
+      "api%2Dversion": context.apiVersion ?? "2026-10-01",
       "%24expand": options?.expand,
     },
     {
@@ -114,7 +112,9 @@ export async function _getDeserialize(result: PathUncheckedResponse): Promise<Sk
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = errorResponseDeserializer(result.body);
+    if (result.body) {
+      error.details = errorResponseDeserializer(result.body);
+    }
 
     throw error;
   }

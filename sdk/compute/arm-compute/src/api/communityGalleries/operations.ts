@@ -22,7 +22,7 @@ export function _getSend(
       subscriptionId: context.subscriptionId,
       location: location,
       publicGalleryName: publicGalleryName,
-      "api%2Dversion": "2025-03-03",
+      "api%2Dversion": "2026-03-03",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -38,7 +38,9 @@ export async function _getDeserialize(result: PathUncheckedResponse): Promise<Co
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }

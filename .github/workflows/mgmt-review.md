@@ -18,10 +18,6 @@ on:
         description: GitHub label-event ID (set by the trusted router)
         required: false
         type: string
-      request_kind:
-        description: Trusted automatic request kind (set by the trusted router)
-        required: false
-        type: string
   bots: [github-actions, azure-sdk-automation]
 jobs:
   safe_outputs:
@@ -38,23 +34,21 @@ jobs:
       ready: ${{ steps.review_request.outputs.ready }}
       pr_number: ${{ steps.review_request.outputs.pr_number }}
       head_sha: ${{ steps.review_request.outputs.head_sha }}
-      workflow_sha: ${{ steps.review_request.outputs.workflow_sha }}
     steps:
       - name: Checkout trusted request validation
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
           sparse-checkout: eng/tools/pr-review
       - name: Validate and claim the review request
         id: review_request
-        uses: actions/github-script@v9.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const { prepareReview } = require('./eng/tools/pr-review/review-request.cjs');
             const request = await prepareReview({ github, context, core }, 'mgmt-review');
             core.setOutput('ready', request ? 'true' : 'false');
-            core.setOutput('workflow_sha', context.sha);
             if (request) {
               core.setOutput('pr_number', request.number);
               core.setOutput('head_sha', request.headSha);
@@ -72,12 +66,6 @@ permissions:
   pull-requests: read
   actions: read
   copilot-requests: write
-# Work around github/gh-aw-mcpg#13221 until gh-aw bundles MCPG v0.4.24 or newer.
-engine:
-  id: copilot
-  version: "1.0.95"
-  # Keep endpoint routing deterministic; auto resolved outside the bundled model catalog.
-  model: gpt-5.6-sol
 strict: true
 network:
   allowed:
@@ -88,11 +76,12 @@ tools:
   github:
     toolsets: [context, repos, pull_requests, actions]
   bash: ["cat", "date", "echo", "grep", "head", "ls", "pwd", "sort", "tail", "uniq", "wc"]
+  cache-memory:
   repo-memory:
 safe-outputs:
   steps:
     - name: Reject stale review outputs
-      uses: actions/github-script@v9.0.0
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       env:
         REVIEW_PR_NUMBER: ${{ needs.validate_request.outputs.pr_number }}
         REVIEW_HEAD_SHA: ${{ needs.validate_request.outputs.head_sha }}
@@ -108,7 +97,6 @@ safe-outputs:
   threat-detection:
     engine:
       id: copilot
-      version: "1.0.80"
       model: gpt-5.6-sol
     prompt: |
       The workflow source prompt is trusted configuration and is expected to
@@ -157,14 +145,6 @@ safe-outputs:
 timeout-minutes: 35
 ---
 
-<!--
-Fork deployment source: Azure/azure-sdk-for-js@ba6dd292c75f268e7240948ebefcf045e24c040a.
-The shared intake/router is deployed to test automatic management review routing.
-Validate the deployed reviewer with PR_REVIEW_TEST_REVIEWERS=mgmt-review and
-node --test eng/tools/pr-review/review-request.test.cjs.
-Compile with gh-aw v0.89.21.
--->
-
 # Management Release Assistant
 
 You are an SDK release assistant that reviews management-plane SDK PRs and provides API surface and tooling review comments.
@@ -172,15 +152,9 @@ You are an SDK release assistant that reviews management-plane SDK PRs and provi
 ## Workflow to review the management PR
 
 Review Azure SDK for JS management library pull request #${{ needs.validate_request.outputs.pr_number }}
-in repository `${{ github.repository }}`
 at head commit `${{ needs.validate_request.outputs.head_sha }}` against the official API review guidelines.
 
 Follow the guidelines in [mgmt-review-guidelines.md](../prompts/mgmt-review-guidelines.md).
-Read that guideline file from this workflow's trusted commit `${{ needs.validate_request.outputs.workflow_sha }}`
-in `${{ github.repository }}`, not from the PR head or its base branch.
-For this fork test, the guideline file is copied verbatim from
-Azure/azure-sdk-for-js#40369 at `f945142734cbfe465adc6ec40523c30ec8583eb7`
-(blob `603d8b96b2271ebc6ff50e7caa2bcd79b1191533`).
 
 ### Important Constraints
 
@@ -199,7 +173,7 @@ Azure/azure-sdk-for-js#40369 at `f945142734cbfe465adc6ec40523c30ec8583eb7`
 
 ### Step 1 — Context Gathering
 
-1. Gather current PR context through read-only GitHub tools. Do not persist review state in this fork test.
+1. **Recall past context** — use `cache-memory` to check whether this PR or package has been reviewed before.
 
 ### Step 2 - Validate any tool issues
 

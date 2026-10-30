@@ -3,6 +3,9 @@
 
 import type { AzureStackHCIContext } from "../../api/azureStackHCIContext.js";
 import {
+  refreshApplicableUpdates,
+  refreshSecuritySettings,
+  validate,
   listBySubscription,
   listByResourceGroup,
   $delete,
@@ -11,6 +14,9 @@ import {
   get,
 } from "../../api/edgeMachines/operations.js";
 import type {
+  EdgeMachinesRefreshApplicableUpdatesOptionalParams,
+  EdgeMachinesRefreshSecuritySettingsOptionalParams,
+  EdgeMachinesValidateOptionalParams,
   EdgeMachinesListBySubscriptionOptionalParams,
   EdgeMachinesListByResourceGroupOptionalParams,
   EdgeMachinesDeleteOptionalParams,
@@ -18,7 +24,12 @@ import type {
   EdgeMachinesCreateOrUpdateOptionalParams,
   EdgeMachinesGetOptionalParams,
 } from "../../api/edgeMachines/options.js";
-import type { EdgeMachine, EdgeMachinePatch } from "../../models/models.js";
+import type {
+  EdgeMachine,
+  EdgeMachinePatch,
+  EdgeMachineValidateRequest,
+  EdgeMachineValidateResponse,
+} from "../../models/models.js";
 import type { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
 import type { SimplePollerLike } from "../../static-helpers/simplePollerHelpers.js";
 import { getSimplePoller } from "../../static-helpers/simplePollerHelpers.js";
@@ -26,6 +37,71 @@ import type { PollerLike, OperationState } from "@azure/core-lro";
 
 /** Interface representing a EdgeMachines operations. */
 export interface EdgeMachinesOperations {
+  /**
+   * Trigger an on-demand refresh of applicable updates for the edge machine.
+   * Creates or updates the default EdgeMachineUpdate child resource with the latest set of applicable updates.
+   */
+  refreshApplicableUpdates: (
+    resourceGroupName: string,
+    edgeMachineName: string,
+    options?: EdgeMachinesRefreshApplicableUpdatesOptionalParams,
+  ) => PollerLike<OperationState<void>, void>;
+  /** @deprecated use refreshApplicableUpdates instead */
+  beginRefreshApplicableUpdates: (
+    resourceGroupName: string,
+    edgeMachineName: string,
+    options?: EdgeMachinesRefreshApplicableUpdatesOptionalParams,
+  ) => Promise<SimplePollerLike<OperationState<void>, void>>;
+  /** @deprecated use refreshApplicableUpdates instead */
+  beginRefreshApplicableUpdatesAndWait: (
+    resourceGroupName: string,
+    edgeMachineName: string,
+    options?: EdgeMachinesRefreshApplicableUpdatesOptionalParams,
+  ) => Promise<void>;
+  /**
+   * Trigger an on-demand sync of edge machine security settings from Guest Configuration.
+   * Creates the default security settings child resource if it does not already exist.
+   */
+  refreshSecuritySettings: (
+    resourceGroupName: string,
+    edgeMachineName: string,
+    options?: EdgeMachinesRefreshSecuritySettingsOptionalParams,
+  ) => PollerLike<OperationState<void>, void>;
+  /** @deprecated use refreshSecuritySettings instead */
+  beginRefreshSecuritySettings: (
+    resourceGroupName: string,
+    edgeMachineName: string,
+    options?: EdgeMachinesRefreshSecuritySettingsOptionalParams,
+  ) => Promise<SimplePollerLike<OperationState<void>, void>>;
+  /** @deprecated use refreshSecuritySettings instead */
+  beginRefreshSecuritySettingsAndWait: (
+    resourceGroupName: string,
+    edgeMachineName: string,
+    options?: EdgeMachinesRefreshSecuritySettingsOptionalParams,
+  ) => Promise<void>;
+  /** A long-running resource action to validate the edge machine. */
+  validate: (
+    resourceGroupName: string,
+    edgeMachineName: string,
+    body: EdgeMachineValidateRequest,
+    options?: EdgeMachinesValidateOptionalParams,
+  ) => PollerLike<OperationState<EdgeMachineValidateResponse>, EdgeMachineValidateResponse>;
+  /** @deprecated use validate instead */
+  beginValidate: (
+    resourceGroupName: string,
+    edgeMachineName: string,
+    body: EdgeMachineValidateRequest,
+    options?: EdgeMachinesValidateOptionalParams,
+  ) => Promise<
+    SimplePollerLike<OperationState<EdgeMachineValidateResponse>, EdgeMachineValidateResponse>
+  >;
+  /** @deprecated use validate instead */
+  beginValidateAndWait: (
+    resourceGroupName: string,
+    edgeMachineName: string,
+    body: EdgeMachineValidateRequest,
+    options?: EdgeMachinesValidateOptionalParams,
+  ) => Promise<EdgeMachineValidateResponse>;
   /** List all edge machines in a subscription. */
   listBySubscription: (
     options?: EdgeMachinesListBySubscriptionOptionalParams,
@@ -36,11 +112,6 @@ export interface EdgeMachinesOperations {
     options?: EdgeMachinesListByResourceGroupOptionalParams,
   ) => PagedAsyncIterableIterator<EdgeMachine>;
   /** Delete an edge machine. */
-  /**
-   *  @fixme delete is a reserved word that cannot be used as an operation name.
-   *         Please add @clientName("clientName") or @clientName("<JS-Specific-Name>", "javascript")
-   *         to the operation to override the generated name.
-   */
   delete: (
     resourceGroupName: string,
     edgeMachineName: string,
@@ -110,6 +181,72 @@ export interface EdgeMachinesOperations {
 
 function _getEdgeMachines(context: AzureStackHCIContext) {
   return {
+    refreshApplicableUpdates: (
+      resourceGroupName: string,
+      edgeMachineName: string,
+      options?: EdgeMachinesRefreshApplicableUpdatesOptionalParams,
+    ) => refreshApplicableUpdates(context, resourceGroupName, edgeMachineName, options),
+    beginRefreshApplicableUpdates: async (
+      resourceGroupName: string,
+      edgeMachineName: string,
+      options?: EdgeMachinesRefreshApplicableUpdatesOptionalParams,
+    ) => {
+      const poller = refreshApplicableUpdates(context, resourceGroupName, edgeMachineName, options);
+      await poller.submitted();
+      return getSimplePoller(poller);
+    },
+    beginRefreshApplicableUpdatesAndWait: async (
+      resourceGroupName: string,
+      edgeMachineName: string,
+      options?: EdgeMachinesRefreshApplicableUpdatesOptionalParams,
+    ) => {
+      return await refreshApplicableUpdates(context, resourceGroupName, edgeMachineName, options);
+    },
+    refreshSecuritySettings: (
+      resourceGroupName: string,
+      edgeMachineName: string,
+      options?: EdgeMachinesRefreshSecuritySettingsOptionalParams,
+    ) => refreshSecuritySettings(context, resourceGroupName, edgeMachineName, options),
+    beginRefreshSecuritySettings: async (
+      resourceGroupName: string,
+      edgeMachineName: string,
+      options?: EdgeMachinesRefreshSecuritySettingsOptionalParams,
+    ) => {
+      const poller = refreshSecuritySettings(context, resourceGroupName, edgeMachineName, options);
+      await poller.submitted();
+      return getSimplePoller(poller);
+    },
+    beginRefreshSecuritySettingsAndWait: async (
+      resourceGroupName: string,
+      edgeMachineName: string,
+      options?: EdgeMachinesRefreshSecuritySettingsOptionalParams,
+    ) => {
+      return await refreshSecuritySettings(context, resourceGroupName, edgeMachineName, options);
+    },
+    validate: (
+      resourceGroupName: string,
+      edgeMachineName: string,
+      body: EdgeMachineValidateRequest,
+      options?: EdgeMachinesValidateOptionalParams,
+    ) => validate(context, resourceGroupName, edgeMachineName, body, options),
+    beginValidate: async (
+      resourceGroupName: string,
+      edgeMachineName: string,
+      body: EdgeMachineValidateRequest,
+      options?: EdgeMachinesValidateOptionalParams,
+    ) => {
+      const poller = validate(context, resourceGroupName, edgeMachineName, body, options);
+      await poller.submitted();
+      return getSimplePoller(poller);
+    },
+    beginValidateAndWait: async (
+      resourceGroupName: string,
+      edgeMachineName: string,
+      body: EdgeMachineValidateRequest,
+      options?: EdgeMachinesValidateOptionalParams,
+    ) => {
+      return await validate(context, resourceGroupName, edgeMachineName, body, options);
+    },
     listBySubscription: (options?: EdgeMachinesListBySubscriptionOptionalParams) =>
       listBySubscription(context, options),
     listByResourceGroup: (

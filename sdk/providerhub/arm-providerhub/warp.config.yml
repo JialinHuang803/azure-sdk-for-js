@@ -5,6 +5,7 @@ exports:
   ".": "./src/index.ts"
   "./api": "./src/api/index.ts"
   "./api/resourceActions": "./src/api/resourceActions/index.ts"
+  "./api/manifests": "./src/api/manifests/index.ts"
   "./api/providerMonitorSettings": "./src/api/providerMonitorSettings/index.ts"
   "./api/authorizedApplications": "./src/api/authorizedApplications/index.ts"
   "./api/skus": "./src/api/skus/index.ts"
@@ -12,24 +13,19 @@ exports:
   "./api/notificationRegistrations": "./src/api/notificationRegistrations/index.ts"
   "./api/defaultRollouts": "./src/api/defaultRollouts/index.ts"
   "./api/providerRegistrations": "./src/api/providerRegistrations/index.ts"
-  "./api/newRegionFrontloadRelease": "./src/api/newRegionFrontloadRelease/index.ts"
   "./api/customRollouts": "./src/api/customRollouts/index.ts"
   "./api/operations": "./src/api/operations/index.ts"
   "./models": "./src/models/index.ts"
 
 targets:
   - name: browser
-    tsconfig: "../../../tsconfig.src.browser.json"
-    polyfillSuffix: "-browser"
-
-  - name: react-native
-    tsconfig: "../../../tsconfig.src.react-native.json"
-    polyfillSuffix: "-react-native"
+    tsconfig: "./config/tsconfig.src.browser.json"
 
   - name: esm
     condition: import
-    tsconfig: "../../../tsconfig.src.esm.json"
+    tsconfig: "./config/tsconfig.src.esm.json"
 
   - name: commonjs
     condition: require
-    tsconfig: "../../../tsconfig.src.cjs.json"
+    tsconfig: "./config/tsconfig.src.cjs.json"
+    moduleType: commonjs

@@ -41,7 +41,7 @@ export function _listByGallerySend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       galleryName: galleryName,
-      "api%2Dversion": "2025-03-03",
+      "api%2Dversion": "2026-03-03",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -59,7 +59,9 @@ export async function _listByGalleryDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -79,7 +81,7 @@ export function listByGallery(
     () => _listByGallerySend(context, resourceGroupName, galleryName, options),
     _listByGalleryDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2025-03-03" },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2026-03-03" },
   );
 }
 
@@ -97,7 +99,7 @@ export function _$deleteSend(
       resourceGroupName: resourceGroupName,
       galleryName: galleryName,
       inVMAccessControlProfileName: inVMAccessControlProfileName,
-      "api%2Dversion": "2025-03-03",
+      "api%2Dversion": "2026-03-03",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -110,7 +112,9 @@ export async function _$deleteDeserialize(result: PathUncheckedResponse): Promis
   const expectedStatuses = ["202", "204", "200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -119,11 +123,6 @@ export async function _$deleteDeserialize(result: PathUncheckedResponse): Promis
 }
 
 /** Delete a gallery inVMAccessControlProfile. */
-/**
- *  @fixme delete is a reserved word that cannot be used as an operation name.
- *         Please add @clientName("clientName") or @clientName("<JS-Specific-Name>", "javascript")
- *         to the operation to override the generated name.
- */
 export function $delete(
   context: Client,
   resourceGroupName: string,
@@ -137,7 +136,7 @@ export function $delete(
     getInitialResponse: () =>
       _$deleteSend(context, resourceGroupName, galleryName, inVMAccessControlProfileName, options),
     resourceLocationConfig: "location",
-    apiVersion: "2025-03-03",
+    apiVersion: "2026-03-03",
   }) as PollerLike<OperationState<void>, void>;
 }
 
@@ -156,7 +155,7 @@ export function _updateSend(
       resourceGroupName: resourceGroupName,
       galleryName: galleryName,
       inVMAccessControlProfileName: inVMAccessControlProfileName,
-      "api%2Dversion": "2025-03-03",
+      "api%2Dversion": "2026-03-03",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -176,7 +175,9 @@ export async function _updateDeserialize(
   const expectedStatuses = ["200", "201", "202"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -206,7 +207,7 @@ export function update(
         options,
       ),
     resourceLocationConfig: "location",
-    apiVersion: "2025-03-03",
+    apiVersion: "2026-03-03",
   }) as PollerLike<
     OperationState<GalleryInVMAccessControlProfile>,
     GalleryInVMAccessControlProfile
@@ -228,7 +229,7 @@ export function _createOrUpdateSend(
       resourceGroupName: resourceGroupName,
       galleryName: galleryName,
       inVMAccessControlProfileName: inVMAccessControlProfileName,
-      "api%2Dversion": "2025-03-03",
+      "api%2Dversion": "2026-03-03",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -248,7 +249,9 @@ export async function _createOrUpdateDeserialize(
   const expectedStatuses = ["200", "201", "202"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -278,7 +281,7 @@ export function createOrUpdate(
         options,
       ),
     resourceLocationConfig: "location",
-    apiVersion: "2025-03-03",
+    apiVersion: "2026-03-03",
   }) as PollerLike<
     OperationState<GalleryInVMAccessControlProfile>,
     GalleryInVMAccessControlProfile
@@ -299,7 +302,7 @@ export function _getSend(
       resourceGroupName: resourceGroupName,
       galleryName: galleryName,
       inVMAccessControlProfileName: inVMAccessControlProfileName,
-      "api%2Dversion": "2025-03-03",
+      "api%2Dversion": "2026-03-03",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -317,7 +320,9 @@ export async function _getDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }

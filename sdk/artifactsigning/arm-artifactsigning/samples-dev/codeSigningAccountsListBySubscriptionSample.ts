@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to lists artifact signing accounts within a subscription.
  *
  * @summary lists artifact signing accounts within a subscription.
- * x-ms-original-file: 2025-10-13/CodeSigningAccounts_ListBySubscription.json
+ * x-ms-original-file: 2026-05-15-preview/CodeSigningAccounts_ListBySubscription.json
  */
 async function listsArtifactSigningAccountsWithinASubscription(): Promise<void> {
   const credential = new DefaultAzureCredential();

@@ -9,6 +9,8 @@ import type {
   Snapshot,
   SnapshotUpdate,
   _SnapshotList,
+  ImmutabilityPolicyData,
+  ImmutabilityPolicyLockData,
 } from "../../models/computeDisk/models.js";
 import {
   grantAccessDataSerializer,
@@ -17,12 +19,16 @@ import {
   snapshotDeserializer,
   snapshotUpdateSerializer,
   _snapshotListDeserializer,
+  immutabilityPolicyDataSerializer,
+  immutabilityPolicyLockDataSerializer,
 } from "../../models/computeDisk/models.js";
 import type { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
 import { buildPagedAsyncIterator } from "../../static-helpers/pagingHelpers.js";
 import { getLongRunningPoller } from "../../static-helpers/pollingHelpers.js";
 import { expandUrlTemplate } from "../../static-helpers/urlTemplate.js";
 import type {
+  SnapshotsUpdateImmutabilityPolicyLockOptionalParams,
+  SnapshotsUpdateImmutabilityPolicyOptionalParams,
   SnapshotsRevokeAccessOptionalParams,
   SnapshotsGrantAccessOptionalParams,
   SnapshotsListOptionalParams,
@@ -36,6 +42,150 @@ import type { StreamableMethod, PathUncheckedResponse } from "@azure-rest/core-c
 import { createRestError, operationOptionsToRequestParameters } from "@azure-rest/core-client";
 import type { PollerLike, OperationState } from "@azure/core-lro";
 
+export function _updateImmutabilityPolicyLockSend(
+  context: Client,
+  resourceGroupName: string,
+  snapshotName: string,
+  immutabilityPolicyData: ImmutabilityPolicyLockData,
+  options: SnapshotsUpdateImmutabilityPolicyLockOptionalParams = { requestOptions: {} },
+): StreamableMethod {
+  const path = expandUrlTemplate(
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/snapshots/{snapshotName}/updateImmutabilityPolicyLock{?api%2Dversion}",
+    {
+      subscriptionId: context.subscriptionId,
+      resourceGroupName: resourceGroupName,
+      snapshotName: snapshotName,
+      "api%2Dversion": "2026-03-02",
+    },
+    {
+      allowReserved: options?.requestOptions?.skipUrlEncoding,
+    },
+  );
+  return context.path(path).post({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/json",
+    headers: { accept: "application/json", ...options.requestOptions?.headers },
+    body: immutabilityPolicyLockDataSerializer(immutabilityPolicyData),
+  });
+}
+
+export async function _updateImmutabilityPolicyLockDeserialize(
+  result: PathUncheckedResponse,
+): Promise<Snapshot> {
+  const expectedStatuses = ["200", "202", "201"];
+  if (!expectedStatuses.includes(result.status)) {
+    const error = createRestError(result);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
+
+    throw error;
+  }
+
+  return snapshotDeserializer(result.body);
+}
+
+/** Locks the immutability policy of a snapshot. Once locked, the policy cannot be reduced or removed until the lock period expires. */
+export function updateImmutabilityPolicyLock(
+  context: Client,
+  resourceGroupName: string,
+  snapshotName: string,
+  immutabilityPolicyData: ImmutabilityPolicyLockData,
+  options: SnapshotsUpdateImmutabilityPolicyLockOptionalParams = { requestOptions: {} },
+): PollerLike<OperationState<Snapshot>, Snapshot> {
+  return getLongRunningPoller(
+    context,
+    _updateImmutabilityPolicyLockDeserialize,
+    ["200", "202", "201"],
+    {
+      updateIntervalInMs: options?.updateIntervalInMs,
+      abortSignal: options?.abortSignal,
+      getInitialResponse: () =>
+        _updateImmutabilityPolicyLockSend(
+          context,
+          resourceGroupName,
+          snapshotName,
+          immutabilityPolicyData,
+          options,
+        ),
+      resourceLocationConfig: "azure-async-operation",
+      apiVersion: "2026-03-02",
+    },
+  ) as PollerLike<OperationState<Snapshot>, Snapshot>;
+}
+
+export function _updateImmutabilityPolicySend(
+  context: Client,
+  resourceGroupName: string,
+  snapshotName: string,
+  immutabilityPolicyData: ImmutabilityPolicyData,
+  options: SnapshotsUpdateImmutabilityPolicyOptionalParams = { requestOptions: {} },
+): StreamableMethod {
+  const path = expandUrlTemplate(
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/snapshots/{snapshotName}/updateImmutabilityPolicy{?api%2Dversion}",
+    {
+      subscriptionId: context.subscriptionId,
+      resourceGroupName: resourceGroupName,
+      snapshotName: snapshotName,
+      "api%2Dversion": "2026-03-02",
+    },
+    {
+      allowReserved: options?.requestOptions?.skipUrlEncoding,
+    },
+  );
+  return context.path(path).post({
+    ...operationOptionsToRequestParameters(options),
+    contentType: "application/json",
+    headers: { accept: "application/json", ...options.requestOptions?.headers },
+    body: immutabilityPolicyDataSerializer(immutabilityPolicyData),
+  });
+}
+
+export async function _updateImmutabilityPolicyDeserialize(
+  result: PathUncheckedResponse,
+): Promise<Snapshot> {
+  const expectedStatuses = ["200", "202", "201"];
+  if (!expectedStatuses.includes(result.status)) {
+    const error = createRestError(result);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
+
+    throw error;
+  }
+
+  return snapshotDeserializer(result.body);
+}
+
+/** Updates the immutability policy of a snapshot. Sets or extends an unlocked immutability policy with the specified duration and type. If the snapshot already has a locked policy, the request will be rejected. Use updateImmutabilityPolicyLock to lock an immutability policy. */
+export function updateImmutabilityPolicy(
+  context: Client,
+  resourceGroupName: string,
+  snapshotName: string,
+  immutabilityPolicyData: ImmutabilityPolicyData,
+  options: SnapshotsUpdateImmutabilityPolicyOptionalParams = { requestOptions: {} },
+): PollerLike<OperationState<Snapshot>, Snapshot> {
+  return getLongRunningPoller(
+    context,
+    _updateImmutabilityPolicyDeserialize,
+    ["200", "202", "201"],
+    {
+      updateIntervalInMs: options?.updateIntervalInMs,
+      abortSignal: options?.abortSignal,
+      getInitialResponse: () =>
+        _updateImmutabilityPolicySend(
+          context,
+          resourceGroupName,
+          snapshotName,
+          immutabilityPolicyData,
+          options,
+        ),
+      resourceLocationConfig: "azure-async-operation",
+      apiVersion: "2026-03-02",
+    },
+  ) as PollerLike<OperationState<Snapshot>, Snapshot>;
+}
+
 export function _revokeAccessSend(
   context: Client,
   resourceGroupName: string,
@@ -48,7 +198,7 @@ export function _revokeAccessSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       snapshotName: snapshotName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -61,7 +211,9 @@ export async function _revokeAccessDeserialize(result: PathUncheckedResponse): P
   const expectedStatuses = ["202", "200", "201"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -81,7 +233,7 @@ export function revokeAccess(
     abortSignal: options?.abortSignal,
     getInitialResponse: () => _revokeAccessSend(context, resourceGroupName, snapshotName, options),
     resourceLocationConfig: "location",
-    apiVersion: "2025-01-02",
+    apiVersion: "2026-03-02",
   }) as PollerLike<OperationState<void>, void>;
 }
 
@@ -98,7 +250,7 @@ export function _grantAccessSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       snapshotName: snapshotName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -113,10 +265,12 @@ export function _grantAccessSend(
 }
 
 export async function _grantAccessDeserialize(result: PathUncheckedResponse): Promise<AccessUri> {
-  const expectedStatuses = ["202", "200", "201"];
+  const expectedStatuses = ["200", "202", "201"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -132,13 +286,13 @@ export function grantAccess(
   grantAccessData: GrantAccessData,
   options: SnapshotsGrantAccessOptionalParams = { requestOptions: {} },
 ): PollerLike<OperationState<AccessUri>, AccessUri> {
-  return getLongRunningPoller(context, _grantAccessDeserialize, ["202", "200", "201"], {
+  return getLongRunningPoller(context, _grantAccessDeserialize, ["200", "202", "201"], {
     updateIntervalInMs: options?.updateIntervalInMs,
     abortSignal: options?.abortSignal,
     getInitialResponse: () =>
       _grantAccessSend(context, resourceGroupName, snapshotName, grantAccessData, options),
     resourceLocationConfig: "location",
-    apiVersion: "2025-01-02",
+    apiVersion: "2026-03-02",
   }) as PollerLike<OperationState<AccessUri>, AccessUri>;
 }
 
@@ -150,7 +304,7 @@ export function _listSend(
     "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/snapshots{?api%2Dversion}",
     {
       subscriptionId: context.subscriptionId,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -166,7 +320,9 @@ export async function _listDeserialize(result: PathUncheckedResponse): Promise<_
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -184,7 +340,7 @@ export function list(
     () => _listSend(context, options),
     _listDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2025-01-02" },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2026-03-02" },
   );
 }
 
@@ -198,7 +354,7 @@ export function _listByResourceGroupSend(
     {
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -216,7 +372,9 @@ export async function _listByResourceGroupDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -235,7 +393,7 @@ export function listByResourceGroup(
     () => _listByResourceGroupSend(context, resourceGroupName, options),
     _listByResourceGroupDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2025-01-02" },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2026-03-02" },
   );
 }
 
@@ -251,7 +409,7 @@ export function _$deleteSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       snapshotName: snapshotName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -264,7 +422,9 @@ export async function _$deleteDeserialize(result: PathUncheckedResponse): Promis
   const expectedStatuses = ["200", "202", "204"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -273,11 +433,6 @@ export async function _$deleteDeserialize(result: PathUncheckedResponse): Promis
 }
 
 /** Deletes a snapshot. */
-/**
- *  @fixme delete is a reserved word that cannot be used as an operation name.
- *         Please add @clientName("clientName") or @clientName("<JS-Specific-Name>", "javascript")
- *         to the operation to override the generated name.
- */
 export function $delete(
   context: Client,
   resourceGroupName: string,
@@ -289,7 +444,7 @@ export function $delete(
     abortSignal: options?.abortSignal,
     getInitialResponse: () => _$deleteSend(context, resourceGroupName, snapshotName, options),
     resourceLocationConfig: "location",
-    apiVersion: "2025-01-02",
+    apiVersion: "2026-03-02",
   }) as PollerLike<OperationState<void>, void>;
 }
 
@@ -306,7 +461,7 @@ export function _updateSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       snapshotName: snapshotName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -324,7 +479,9 @@ export async function _updateDeserialize(result: PathUncheckedResponse): Promise
   const expectedStatuses = ["200", "202", "201"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -346,7 +503,7 @@ export function update(
     getInitialResponse: () =>
       _updateSend(context, resourceGroupName, snapshotName, snapshot, options),
     resourceLocationConfig: "location",
-    apiVersion: "2025-01-02",
+    apiVersion: "2026-03-02",
   }) as PollerLike<OperationState<Snapshot>, Snapshot>;
 }
 
@@ -363,7 +520,7 @@ export function _createOrUpdateSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       snapshotName: snapshotName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -381,7 +538,9 @@ export async function _createOrUpdateDeserialize(result: PathUncheckedResponse):
   const expectedStatuses = ["200", "202", "201"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -403,7 +562,7 @@ export function createOrUpdate(
     getInitialResponse: () =>
       _createOrUpdateSend(context, resourceGroupName, snapshotName, snapshot, options),
     resourceLocationConfig: "location",
-    apiVersion: "2025-01-02",
+    apiVersion: "2026-03-02",
   }) as PollerLike<OperationState<Snapshot>, Snapshot>;
 }
 
@@ -419,7 +578,7 @@ export function _getSend(
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       snapshotName: snapshotName,
-      "api%2Dversion": "2025-01-02",
+      "api%2Dversion": "2026-03-02",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -435,7 +594,9 @@ export async function _getDeserialize(result: PathUncheckedResponse): Promise<Sn
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }

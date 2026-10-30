@@ -2,75 +2,145 @@
 // Licensed under the MIT License.
 
 /**
- * @summary Demonstrates the Knowledge Source Operations.
+ * @summary Demonstrates generic CRUD operations on knowledge sources:
+ * create / get / update / list / status / delete. For samples specific
+ * to each knowledge source kind (e.g. `searchIndex`, `file`, `mcpServer`,
+ * `indexedSharePoint`, `remoteSharePoint`, `workIQ`, `fabricDataAgent`,
+ * `fabricOntology`) see the corresponding `*KnowledgeSource*` sample
+ * files in this directory.
  */
 
 import { DefaultAzureCredential } from "@azure/identity";
-import type { SearchIndexKnowledgeSource, KnowledgeBase } from "@azure/search-documents";
-import { SearchIndexClient } from "@azure/search-documents";
+import type { AzureBlobKnowledgeSource, SearchIndexKnowledgeSource } from "@azure/search-documents";
+import {
+  KnownKnowledgeSourceNetworkAccessMode,
+  SearchIndexClient,
+  SearchIndexerClient,
+} from "@azure/search-documents";
 
 import * as dotenv from "dotenv";
 dotenv.config();
 
 const endpoint = process.env.ENDPOINT || "";
+const blobConnectionString = process.env.AZURE_BLOB_CONNECTION_STRING || "";
+const blobContainerName = process.env.AZURE_BLOB_CONTAINER_NAME || "";
+const aiServicesEndpoint = process.env.AZURE_AI_SERVICES_ENDPOINT || "";
+const expectedAnalyzer = process.env.EXPECTED_LANGUAGE_ANALYZER || "";
+const expectedFallbackAnalyzer = process.env.EXPECTED_FALLBACK_ANALYZER || "";
+
 const TEST_KNOWLEDGE_SOURCE_NAME = "example-knowledge-source-sample-1";
-const TEST_KNOWLEDGE_BASE_NAME = "example-knowledge-base-for-source-sample";
 const TEST_INDEX_NAME = "example-index-for-source-sample";
+const PRIVATE_BLOB_SOURCE_NAME = "example-private-blob-source-sample";
+
+function assertSample(condition: unknown, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(`Sample assertion failed: ${message}`);
+  }
+}
 
 async function setupPrerequisites(client: SearchIndexClient): Promise<void> {
   console.log(`Setting up prerequisites...`);
-
-  // Create a search index that will be used by the knowledge source
-  const index = {
+  await client.createIndex({
     name: TEST_INDEX_NAME,
     fields: [
-      {
-        type: "Edm.String" as const,
-        name: "id",
-        key: true,
-      },
-      {
-        type: "Edm.String" as const,
-        name: "content",
-        searchable: true,
-      },
-      {
-        type: "Edm.String" as const,
-        name: "title",
-        searchable: true,
-        filterable: true,
-      },
+      { type: "Edm.String" as const, name: "id", key: true },
+      { type: "Edm.String" as const, name: "content", searchable: true },
+      { type: "Edm.String" as const, name: "category", filterable: true },
+      { type: "Edm.String" as const, name: "priority", filterable: true },
     ],
-  };
-  await client.createIndex(index);
+  });
   console.log(`Created search index: ${TEST_INDEX_NAME}`);
-
-  // Create a knowledge base to associate with the knowledge source
-  const knowledgeBase: KnowledgeBase = {
-    name: TEST_KNOWLEDGE_BASE_NAME,
-    knowledgeSources: [],
-    description: "A knowledge base for knowledge source demonstration",
-  };
-  await client.createKnowledgeBase(knowledgeBase);
-  console.log(`Created knowledge base: ${TEST_KNOWLEDGE_BASE_NAME}`);
 }
 
 async function createKnowledgeSource(sourceName: string, client: SearchIndexClient): Promise<void> {
   console.log(`Creating Knowledge Source Operation`);
-
-  // Create a search index knowledge source
   const knowledgeSource: SearchIndexKnowledgeSource = {
     name: sourceName,
     kind: "searchIndex",
     description: "A sample search index knowledge source",
     searchIndexParameters: {
       searchIndexName: TEST_INDEX_NAME,
+      queryHints: {
+        filters: [
+          {
+            field: "category",
+            fieldValues: ["manual"],
+            filterInstructions: "Prefer product manuals when the user asks how-to questions.",
+          },
+        ],
+        boosts: [{ kind: "fieldValue", field: "priority", fieldValues: ["high"], boost: 2 }],
+      },
+    },
+  };
+  const result = await client.createKnowledgeSource(knowledgeSource);
+  const createdSearchSource = result as SearchIndexKnowledgeSource;
+  assertSample(
+    createdSearchSource.searchIndexParameters.queryHints?.filters?.[0]?.field === "category",
+    "stored query hints should round-trip",
+  );
+  console.log(`Created knowledge source: ${result.name} (kind=${result.kind})`);
+}
+
+async function createPrivateBlobSource(
+  indexClient: SearchIndexClient,
+  indexerClient: SearchIndexerClient,
+): Promise<void> {
+  if (!blobConnectionString || !blobContainerName || !aiServicesEndpoint) {
+    console.log(
+      "Skipping private Blob ingestion/analyzer inspection. Set AZURE_BLOB_CONNECTION_STRING, " +
+        "AZURE_BLOB_CONTAINER_NAME, and AZURE_AI_SERVICES_ENDPOINT after provisioning the " +
+        "required shared private links.",
+    );
+    return;
+  }
+
+  const source: AzureBlobKnowledgeSource = {
+    name: PRIVATE_BLOB_SOURCE_NAME,
+    kind: "azureBlob",
+    description: "Private Blob ingestion with service-selected language analyzers",
+    azureBlobParameters: {
+      connectionString: blobConnectionString,
+      containerName: blobContainerName,
+      ingestionParameters: {
+        networkAccessMode: KnownKnowledgeSourceNetworkAccessMode.Private,
+        contentExtractionMode: "minimal",
+        aiServices: { uri: aiServicesEndpoint },
+      },
     },
   };
 
-  const result = await client.createKnowledgeSource(knowledgeSource);
-  console.log(`Created knowledge source: ${result.name}`);
-  console.log(`Kind: ${result.kind}`);
+  const created = (await indexClient.createKnowledgeSource(source)) as AzureBlobKnowledgeSource;
+  assertSample(
+    created.azureBlobParameters.ingestionParameters?.networkAccessMode === "private",
+    "private networkAccessMode should round-trip",
+  );
+
+  const generatedResources = created.azureBlobParameters.createdResources ?? {};
+  console.log(`Generated resources: ${JSON.stringify(generatedResources)}`);
+  if (generatedResources.indexer) {
+    const status = await indexerClient.getIndexerStatus(generatedResources.indexer);
+    console.log(`Generated indexer status: ${status.status}`);
+  }
+  if (generatedResources.index) {
+    const generatedIndex = await indexClient.getIndex(generatedResources.index);
+    const selectedAnalyzers = generatedIndex.fields
+      .filter((field) => "analyzerName" in field && field.analyzerName)
+      .map((field) => ("analyzerName" in field ? field.analyzerName : undefined))
+      .filter((name): name is string => name !== undefined);
+    console.log(`Service-selected analyzers: ${selectedAnalyzers.join(", ") || "none yet"}`);
+    if (expectedAnalyzer) {
+      assertSample(
+        selectedAnalyzers.includes(expectedAnalyzer),
+        `expected analyzer ${expectedAnalyzer} was not selected`,
+      );
+    }
+    if (expectedFallbackAnalyzer) {
+      assertSample(
+        selectedAnalyzers.includes(expectedFallbackAnalyzer),
+        `unsupported-language content should fall back to ${expectedFallbackAnalyzer}`,
+      );
+    }
+  }
 }
 
 async function getAndUpdateKnowledgeSource(
@@ -79,10 +149,8 @@ async function getAndUpdateKnowledgeSource(
 ): Promise<void> {
   console.log(`Get And Update Knowledge Source Operation`);
   const knowledgeSource = await client.getKnowledgeSource(sourceName);
-  console.log(`Retrieved knowledge source: ${knowledgeSource.name}`);
-  console.log(`Kind: ${knowledgeSource.kind}`);
+  console.log(`Retrieved knowledge source: ${knowledgeSource.name} (kind=${knowledgeSource.kind})`);
 
-  // Update the description
   knowledgeSource.description = "Updated description for the sample knowledge source";
   const updatedSource = await client.createOrUpdateKnowledgeSource(knowledgeSource);
   console.log(`Updated knowledge source description: ${updatedSource.description}`);
@@ -101,17 +169,8 @@ async function getKnowledgeSourceStatus(
 
 async function listKnowledgeSources(client: SearchIndexClient): Promise<void> {
   console.log(`List Knowledge Sources Operation`);
-  const result = client.listKnowledgeSources();
-  let listOfSources = await result.next();
-
-  console.log(`List of Knowledge Sources`);
-  console.log(`*************************`);
-  while (!listOfSources.done) {
-    console.log(`Name: ${listOfSources.value.name}`);
-    console.log(`Kind: ${listOfSources.value.kind}`);
-    console.log(`Description: ${listOfSources.value.description ?? "N/A"}`);
-    console.log();
-    listOfSources = await result.next();
+  for await (const source of client.listKnowledgeSources()) {
+    console.log(`  - ${source.name} (kind=${source.kind})`);
   }
 }
 
@@ -123,18 +182,7 @@ async function deleteKnowledgeSource(sourceName: string, client: SearchIndexClie
 
 async function cleanupPrerequisites(client: SearchIndexClient): Promise<void> {
   console.log(`Cleaning up prerequisites...`);
-  try {
-    await client.deleteKnowledgeBase(TEST_KNOWLEDGE_BASE_NAME);
-    console.log(`Deleted knowledge base: ${TEST_KNOWLEDGE_BASE_NAME}`);
-  } catch (e) {
-    console.log(`Failed to delete knowledge base: ${e}`);
-  }
-  try {
-    await client.deleteIndex(TEST_INDEX_NAME);
-    console.log(`Deleted search index: ${TEST_INDEX_NAME}`);
-  } catch (e) {
-    console.log(`Failed to delete index: ${e}`);
-  }
+  await client.deleteIndex(TEST_INDEX_NAME).catch(() => {});
 }
 
 async function main(): Promise<void> {
@@ -144,14 +192,17 @@ async function main(): Promise<void> {
     return;
   }
   const client = new SearchIndexClient(endpoint, new DefaultAzureCredential());
+  const indexerClient = new SearchIndexerClient(endpoint, new DefaultAzureCredential());
   try {
     await setupPrerequisites(client);
     await createKnowledgeSource(TEST_KNOWLEDGE_SOURCE_NAME, client);
     await getAndUpdateKnowledgeSource(TEST_KNOWLEDGE_SOURCE_NAME, client);
     await getKnowledgeSourceStatus(TEST_KNOWLEDGE_SOURCE_NAME, client);
     await listKnowledgeSources(client);
+    await createPrivateBlobSource(client, indexerClient);
   } finally {
-    await deleteKnowledgeSource(TEST_KNOWLEDGE_SOURCE_NAME, client);
+    await client.deleteKnowledgeSource(PRIVATE_BLOB_SOURCE_NAME).catch(() => {});
+    await deleteKnowledgeSource(TEST_KNOWLEDGE_SOURCE_NAME, client).catch(() => {});
     await cleanupPrerequisites(client);
   }
 }

@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to delete an artifact signing account.
  *
  * @summary delete an artifact signing account.
- * x-ms-original-file: 2025-10-13/CodeSigningAccounts_Delete.json
+ * x-ms-original-file: 2026-05-15-preview/CodeSigningAccounts_Delete.json
  */
 async function deleteAnArtifactSigningAccount(): Promise<void> {
   const credential = new DefaultAzureCredential();

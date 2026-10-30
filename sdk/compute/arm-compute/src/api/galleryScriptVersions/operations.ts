@@ -43,7 +43,7 @@ export function _listByGalleryScriptSend(
       resourceGroupName: resourceGroupName,
       galleryName: galleryName,
       galleryScriptName: galleryScriptName,
-      "api%2Dversion": "2025-03-03",
+      "api%2Dversion": "2026-03-03",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -61,7 +61,9 @@ export async function _listByGalleryScriptDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -83,7 +85,7 @@ export function listByGalleryScript(
       _listByGalleryScriptSend(context, resourceGroupName, galleryName, galleryScriptName, options),
     _listByGalleryScriptDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2025-03-03" },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2026-03-03" },
   );
 }
 
@@ -103,7 +105,7 @@ export function _$deleteSend(
       galleryName: galleryName,
       galleryScriptName: galleryScriptName,
       galleryScriptVersionName: galleryScriptVersionName,
-      "api%2Dversion": "2025-03-03",
+      "api%2Dversion": "2026-03-03",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -116,7 +118,9 @@ export async function _$deleteDeserialize(result: PathUncheckedResponse): Promis
   const expectedStatuses = ["202", "204", "200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -125,11 +129,6 @@ export async function _$deleteDeserialize(result: PathUncheckedResponse): Promis
 }
 
 /** Delete a gallery Script Version. */
-/**
- *  @fixme delete is a reserved word that cannot be used as an operation name.
- *         Please add @clientName("clientName") or @clientName("<JS-Specific-Name>", "javascript")
- *         to the operation to override the generated name.
- */
 export function $delete(
   context: Client,
   resourceGroupName: string,
@@ -151,7 +150,7 @@ export function $delete(
         options,
       ),
     resourceLocationConfig: "azure-async-operation",
-    apiVersion: "2025-03-03",
+    apiVersion: "2026-03-03",
   }) as PollerLike<OperationState<void>, void>;
 }
 
@@ -172,7 +171,7 @@ export function _updateSend(
       galleryName: galleryName,
       galleryScriptName: galleryScriptName,
       galleryScriptVersionName: galleryScriptVersionName,
-      "api%2Dversion": "2025-03-03",
+      "api%2Dversion": "2026-03-03",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -192,7 +191,9 @@ export async function _updateDeserialize(
   const expectedStatuses = ["200", "202", "201"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -224,7 +225,7 @@ export function update(
         options,
       ),
     resourceLocationConfig: "azure-async-operation",
-    apiVersion: "2025-03-03",
+    apiVersion: "2026-03-03",
   }) as PollerLike<OperationState<GalleryScriptVersion>, GalleryScriptVersion>;
 }
 
@@ -245,7 +246,7 @@ export function _createOrUpdateSend(
       galleryName: galleryName,
       galleryScriptName: galleryScriptName,
       galleryScriptVersionName: galleryScriptVersionName,
-      "api%2Dversion": "2025-03-03",
+      "api%2Dversion": "2026-03-03",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -265,7 +266,9 @@ export async function _createOrUpdateDeserialize(
   const expectedStatuses = ["200", "201", "202"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -297,7 +300,7 @@ export function createOrUpdate(
         options,
       ),
     resourceLocationConfig: "azure-async-operation",
-    apiVersion: "2025-03-03",
+    apiVersion: "2026-03-03",
   }) as PollerLike<OperationState<GalleryScriptVersion>, GalleryScriptVersion>;
 }
 
@@ -317,7 +320,7 @@ export function _getSend(
       galleryName: galleryName,
       galleryScriptName: galleryScriptName,
       galleryScriptVersionName: galleryScriptVersionName,
-      "api%2Dversion": "2025-03-03",
+      "api%2Dversion": "2026-03-03",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -335,7 +338,9 @@ export async function _getDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }

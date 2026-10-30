@@ -8,7 +8,21 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to get a ClusterJob
  *
  * @summary get a ClusterJob
- * x-ms-original-file: 2026-04-01-preview/ClusterJobs_Get_ConfigureSdnIntegrationJob.json
+ * x-ms-original-file: 2026-10-01/ClusterJobs_Get_AddServerJob.json
+ */
+async function clusterJobsGetAddServerJob(): Promise<void> {
+  const credential = new DefaultAzureCredential();
+  const subscriptionId = "fd3c3665-1729-4b7b-9a38-238e83b0f98b";
+  const client = new AzureStackHCIClient(credential, subscriptionId);
+  const result = await client.clusterJobs.get("test-rg", "myCluster", "addserver");
+  console.log(result);
+}
+
+/**
+ * This sample demonstrates how to get a ClusterJob
+ *
+ * @summary get a ClusterJob
+ * x-ms-original-file: 2026-10-01/ClusterJobs_Get_ConfigureSdnIntegrationJob.json
  */
 async function clusterJobsGetConfigureSdnIntegrationJob(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -18,8 +32,24 @@ async function clusterJobsGetConfigureSdnIntegrationJob(): Promise<void> {
   console.log(result);
 }
 
+/**
+ * This sample demonstrates how to get a ClusterJob
+ *
+ * @summary get a ClusterJob
+ * x-ms-original-file: 2026-10-01/ClusterJobs_Get_RepairServerJob.json
+ */
+async function clusterJobsGetRepairServerJob(): Promise<void> {
+  const credential = new DefaultAzureCredential();
+  const subscriptionId = "fd3c3665-1729-4b7b-9a38-238e83b0f98b";
+  const client = new AzureStackHCIClient(credential, subscriptionId);
+  const result = await client.clusterJobs.get("test-rg", "myCluster", "repairserver");
+  console.log(result);
+}
+
 async function main(): Promise<void> {
+  await clusterJobsGetAddServerJob();
   await clusterJobsGetConfigureSdnIntegrationJob();
+  await clusterJobsGetRepairServerJob();
 }
 
 main().catch(console.error);

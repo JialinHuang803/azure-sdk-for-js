@@ -491,12 +491,10 @@ function serializeBase64UrlType(objectName: string, value: any): any {
 function serializeDateTypes(typeName: string, value: any, objectName: string): any {
   if (value !== undefined && value !== null) {
     if (typeName.match(/^Date$/i) !== null) {
-      if (
-        !(
-          value instanceof Date ||
-          (typeof value.valueOf() === "string" && !isNaN(Date.parse(value)))
-        )
-      ) {
+      if (!(
+        value instanceof Date ||
+        (typeof value.valueOf() === "string" && !isNaN(Date.parse(value)))
+      )) {
         throw new Error(`${objectName} must be an instanceof Date or a string in ISO8601 format.`);
       }
       value =
@@ -504,32 +502,26 @@ function serializeDateTypes(typeName: string, value: any, objectName: string): a
           ? value.toISOString().substring(0, 10)
           : new Date(value).toISOString().substring(0, 10);
     } else if (typeName.match(/^DateTime$/i) !== null) {
-      if (
-        !(
-          value instanceof Date ||
-          (typeof value.valueOf() === "string" && !isNaN(Date.parse(value)))
-        )
-      ) {
+      if (!(
+        value instanceof Date ||
+        (typeof value.valueOf() === "string" && !isNaN(Date.parse(value)))
+      )) {
         throw new Error(`${objectName} must be an instanceof Date or a string in ISO8601 format.`);
       }
       value = value instanceof Date ? value.toISOString() : new Date(value).toISOString();
     } else if (typeName.match(/^DateTimeRfc1123$/i) !== null) {
-      if (
-        !(
-          value instanceof Date ||
-          (typeof value.valueOf() === "string" && !isNaN(Date.parse(value)))
-        )
-      ) {
+      if (!(
+        value instanceof Date ||
+        (typeof value.valueOf() === "string" && !isNaN(Date.parse(value)))
+      )) {
         throw new Error(`${objectName} must be an instanceof Date or a string in RFC-1123 format.`);
       }
       value = value instanceof Date ? value.toUTCString() : new Date(value).toUTCString();
     } else if (typeName.match(/^UnixTime$/i) !== null) {
-      if (
-        !(
-          value instanceof Date ||
-          (typeof value.valueOf() === "string" && !isNaN(Date.parse(value)))
-        )
-      ) {
+      if (!(
+        value instanceof Date ||
+        (typeof value.valueOf() === "string" && !isNaN(Date.parse(value)))
+      )) {
         throw new Error(
           `${objectName} must be an instanceof Date or a string in RFC-1123/ISO8601 format ` +
             `for it to be serialized in UnixTime/Epoch format.`,
@@ -615,7 +607,12 @@ function serializeDictionaryType(
   for (const key of Object.keys(object)) {
     const serializedValue = serializer.serialize(valueType, object[key], objectName, options);
     // If the element needs an XML namespace we need to add it within the $ property
-    tempDictionary[key] = getXmlObjectValue(valueType, serializedValue, isXml, options);
+    Object.defineProperty(tempDictionary, key, {
+      value: getXmlObjectValue(valueType, serializedValue, isXml, options),
+      enumerable: true,
+      configurable: true,
+      writable: true,
+    });
   }
 
   // Add the namespace to the root element if needed
@@ -890,12 +887,17 @@ function deserializeCompositeType(
       const dictionary: any = {};
       for (const headerKey of Object.keys(responseBody)) {
         if (headerKey.startsWith(headerCollectionPrefix)) {
-          dictionary[headerKey.substring(headerCollectionPrefix.length)] = serializer.deserialize(
-            (propertyMapper as DictionaryMapper).type.value,
-            responseBody[headerKey],
-            propertyObjectName,
-            options,
-          );
+          Object.defineProperty(dictionary, headerKey.substring(headerCollectionPrefix.length), {
+            value: serializer.deserialize(
+              (propertyMapper as DictionaryMapper).type.value,
+              responseBody[headerKey],
+              propertyObjectName,
+              options,
+            ),
+            enumerable: true,
+            configurable: true,
+            writable: true,
+          });
         }
 
         handledPropertyNames.push(headerKey);
@@ -1084,7 +1086,12 @@ function deserializeDictionaryType(
   if (responseBody) {
     const tempDictionary: { [key: string]: any } = {};
     for (const key of Object.keys(responseBody)) {
-      tempDictionary[key] = serializer.deserialize(value, responseBody[key], objectName, options);
+      Object.defineProperty(tempDictionary, key, {
+        value: serializer.deserialize(value, responseBody[key], objectName, options),
+        enumerable: true,
+        configurable: true,
+        writable: true,
+      });
     }
     return tempDictionary;
   }

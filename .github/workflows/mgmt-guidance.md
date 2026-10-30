@@ -92,12 +92,6 @@ permissions:
   pull-requests: read
   actions: read
   copilot-requests: write
-# Work around github/gh-aw-mcpg#13221 until gh-aw bundles MCPG v0.4.24 or newer.
-engine:
-  id: copilot
-  version: "1.0.80"
-  # Fork test adaptation: avoid the unsupported auto-selected model route.
-  model: gpt-5.6-sol
 strict: false
 network:
   allowed:
@@ -111,7 +105,6 @@ safe-outputs:
   threat-detection:
     engine:
       id: copilot
-      version: "1.0.80"
       model: gpt-5.6-sol
     prompt: |
       The workflow source prompt is trusted configuration and is expected to
@@ -141,14 +134,6 @@ safe-outputs:
 timeout-minutes: 10
 
 ---
-
-<!--
-Fork test source: Azure/azure-sdk-for-js#40420 at
-667db0d3b68cfef90adf2ccfa58a8ee47d842f38.
-Original workflow blob: fe22c848e4d6e2368bea5fd37e5adb8effb78da1.
-Only the explicit model pin above is added for the fork runtime.
-Compile with gh-aw v0.89.21.
--->
 
 # Management SDK Merge Guidance
 

@@ -39,7 +39,7 @@ import { _getServicesOperations } from "./classic/services/index.js";
 import type { TokenCredential } from "@azure/core-auth";
 import type { Pipeline } from "@azure/core-rest-pipeline";
 
-export { ServiceFabricManagedClustersManagementClientOptionalParams } from "./api/serviceFabricManagedClustersManagementContext.js";
+export type { ServiceFabricManagedClustersManagementClientOptionalParams } from "./api/serviceFabricManagedClustersManagementContext.js";
 
 export class ServiceFabricManagedClustersManagementClient {
   private _client: ServiceFabricManagedClustersManagementContext;
@@ -70,14 +70,11 @@ export class ServiceFabricManagedClustersManagementClient {
     }
 
     options = options ?? {};
-    const prefixFromOptions = options?.userAgentOptions?.userAgentPrefix;
-    const userAgentPrefix = prefixFromOptions
-      ? `${prefixFromOptions} azsdk-js-client`
-      : `azsdk-js-client`;
-    this._client = createServiceFabricManagedClustersManagement(credential, subscriptionId ?? "", {
-      ...options,
-      userAgentOptions: { userAgentPrefix },
-    });
+    this._client = createServiceFabricManagedClustersManagement(
+      credential,
+      subscriptionId ?? "",
+      options,
+    );
     this.pipeline = this._client.pipeline;
     this.operationStatus = _getOperationStatusOperations(this._client);
     this.operationResults = _getOperationResultsOperations(this._client);

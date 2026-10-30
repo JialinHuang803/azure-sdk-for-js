@@ -1,4 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-export { createPolicy, PolicyContext, PolicyClientOptionalParams } from "./policyContext.js";
+export type { PolicyContext, PolicyClientOptionalParams } from "./policyContext.js";
+export { createPolicy } from "./policyContext.js";

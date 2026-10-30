@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to create or update a Service Fabric node type of a given managed cluster.
  *
  * @summary create or update a Service Fabric node type of a given managed cluster.
- * x-ms-original-file: 2026-02-01/NodeTypePutOperationAutoScale_example.json
+ * x-ms-original-file: 2026-05-01-preview/NodeTypePutOperationAutoScale_example.json
  */
 async function putANodeTypeWithAutoScaleParameters(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -66,7 +66,7 @@ async function putANodeTypeWithAutoScaleParameters(): Promise<void> {
  * This sample demonstrates how to create or update a Service Fabric node type of a given managed cluster.
  *
  * @summary create or update a Service Fabric node type of a given managed cluster.
- * x-ms-original-file: 2026-02-01/NodeTypePutOperationCustomImage_example.json
+ * x-ms-original-file: 2026-05-01-preview/NodeTypePutOperationCustomImage_example.json
  */
 async function putNodeTypeWithCustomVmImage(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -87,7 +87,7 @@ async function putNodeTypeWithCustomVmImage(): Promise<void> {
  * This sample demonstrates how to create or update a Service Fabric node type of a given managed cluster.
  *
  * @summary create or update a Service Fabric node type of a given managed cluster.
- * x-ms-original-file: 2026-02-01/NodeTypePutOperationCustomSharedGalleriesImage_example.json
+ * x-ms-original-file: 2026-05-01-preview/NodeTypePutOperationCustomSharedGalleriesImage_example.json
  */
 async function putNodeTypeWithSharedGalleriesCustomVmImage(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -108,7 +108,7 @@ async function putNodeTypeWithSharedGalleriesCustomVmImage(): Promise<void> {
  * This sample demonstrates how to create or update a Service Fabric node type of a given managed cluster.
  *
  * @summary create or update a Service Fabric node type of a given managed cluster.
- * x-ms-original-file: 2026-02-01/NodeTypePutOperationDedicatedHost_example.json
+ * x-ms-original-file: 2026-05-01-preview/NodeTypePutOperationDedicatedHost_example.json
  */
 async function putNodeTypeWithDedicatedHosts(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -137,7 +137,7 @@ async function putNodeTypeWithDedicatedHosts(): Promise<void> {
  * This sample demonstrates how to create or update a Service Fabric node type of a given managed cluster.
  *
  * @summary create or update a Service Fabric node type of a given managed cluster.
- * x-ms-original-file: 2026-02-01/NodeTypePutOperationStateless_example.json
+ * x-ms-original-file: 2026-05-01-preview/NodeTypePutOperationStateless_example.json
  */
 async function putAnStatelessNodeTypeWithTemporaryDiskForServiceFabric(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -173,7 +173,7 @@ async function putAnStatelessNodeTypeWithTemporaryDiskForServiceFabric(): Promis
  * This sample demonstrates how to create or update a Service Fabric node type of a given managed cluster.
  *
  * @summary create or update a Service Fabric node type of a given managed cluster.
- * x-ms-original-file: 2026-02-01/NodeTypePutOperationVmImagePlan_example.json
+ * x-ms-original-file: 2026-05-01-preview/NodeTypePutOperationVmImagePlan_example.json
  */
 async function putNodeTypeWithVmImagePlan(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -201,7 +201,7 @@ async function putNodeTypeWithVmImagePlan(): Promise<void> {
  * This sample demonstrates how to create or update a Service Fabric node type of a given managed cluster.
  *
  * @summary create or update a Service Fabric node type of a given managed cluster.
- * x-ms-original-file: 2026-02-01/NodeTypePutOperation_example_max.json
+ * x-ms-original-file: 2026-05-01-preview/NodeTypePutOperation_example_max.json
  */
 async function putANodeTypeWithMaximumParameters(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -266,6 +266,7 @@ async function putANodeTypeWithMaximumParameters(): Promise<void> {
       enableNodePublicIP: true,
       enableNodePublicIPv6: true,
       enableOverProvisioning: false,
+      enableResilientEphemeralOsDisk: true,
       evictionPolicy: "Deallocate",
       frontendConfigurations: [
         {
@@ -277,6 +278,7 @@ async function putANodeTypeWithMaximumParameters(): Promise<void> {
             "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resRg/providers/Microsoft.Network/loadBalancers/test-LB/inboundNatPools/LoadBalancerNATPool",
         },
       ],
+      isOutboundOnly: true,
       isPrimary: false,
       isSpotVM: true,
       isStateless: true,
@@ -284,9 +286,17 @@ async function putANodeTypeWithMaximumParameters(): Promise<void> {
       natGatewayId:
         "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resRg/providers/Microsoft.Network/natGateways/myNatGateway",
       placementProperties: { HasSSD: "true", NodeColor: "green", SomeProperty: "5" },
+      proxyAgentSettings: {
+        enabled: true,
+        keyIncarnationId: 17,
+        wireServer: { mode: "Audit", inVMAccessControlProfileReferenceId: "someReferenceId" },
+        imds: { mode: "Audit", inVMAccessControlProfileReferenceId: "someReferenceId" },
+        addProxyAgentExtension: true,
+      },
+      scaleInPolicy: { mode: "Default" },
       secureBootEnabled: true,
-      securityType: "ConfidentialVM",
       securityEncryptionType: "DiskWithVMGuestState",
+      securityType: "ConfidentialVM",
       serviceArtifactReferenceId:
         "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resRg/providers/Microsoft.Compute/galleries/myGallery/serviceArtifacts/myServiceArtifact/vmArtifactsProfiles/myVmArtifactProfile",
       spotRestoreTimeout: "PT30M",
@@ -346,8 +356,6 @@ async function putANodeTypeWithMaximumParameters(): Promise<void> {
       ],
       vmSetupActions: ["EnableContainers", "EnableHyperV"],
       vmSize: "Standard_DS3",
-      isOutboundOnly: true,
-      enableResilientEphemeralOsDisk: true,
     },
   );
   console.log(result);
@@ -357,7 +365,7 @@ async function putANodeTypeWithMaximumParameters(): Promise<void> {
  * This sample demonstrates how to create or update a Service Fabric node type of a given managed cluster.
  *
  * @summary create or update a Service Fabric node type of a given managed cluster.
- * x-ms-original-file: 2026-02-01/NodeTypePutOperation_example_min.json
+ * x-ms-original-file: 2026-05-01-preview/NodeTypePutOperation_example_min.json
  */
 async function putANodeTypeWithMinimumParameters(): Promise<void> {
   const credential = new DefaultAzureCredential();

@@ -3,32 +3,18 @@
 
 import { OperationalInsightsManagementClient } from "@azure/arm-operationalinsights";
 import { DefaultAzureCredential } from "@azure/identity";
-import "dotenv/config";
 
 /**
- * This sample demonstrates how to Deletes a linked service instance.
+ * This sample demonstrates how to deletes a linked service instance.
  *
- * @summary Deletes a linked service instance.
- * x-ms-original-file: specification/operationalinsights/resource-manager/Microsoft.OperationalInsights/OperationalInsights/stable/2025-07-01/examples/LinkedServicesDelete.json
+ * @summary deletes a linked service instance.
+ * x-ms-original-file: 2025-07-01/LinkedServicesDelete.json
  */
 async function linkedServicesDelete(): Promise<void> {
-  const subscriptionId =
-    process.env["OPERATIONALINSIGHTS_SUBSCRIPTION_ID"] ||
-    "00000000-0000-0000-0000-00000000000";
-  const resourceGroupName =
-    process.env["OPERATIONALINSIGHTS_RESOURCE_GROUP"] || "rg1";
-  const workspaceName = "TestLinkWS";
-  const linkedServiceName = "Cluster";
   const credential = new DefaultAzureCredential();
-  const client = new OperationalInsightsManagementClient(
-    credential,
-    subscriptionId,
-  );
-  const result = await client.linkedServices.beginDeleteAndWait(
-    resourceGroupName,
-    workspaceName,
-    linkedServiceName,
-  );
+  const subscriptionId = "00000000-0000-0000-0000-000000000000";
+  const client = new OperationalInsightsManagementClient(credential, subscriptionId);
+  const result = await client.linkedServices.delete("rg1", "TestLinkWS", "Cluster");
   console.log(result);
 }
 

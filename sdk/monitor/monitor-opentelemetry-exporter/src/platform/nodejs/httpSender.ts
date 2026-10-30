@@ -3,7 +3,11 @@
 
 import url from "node:url";
 import { diag } from "@opentelemetry/api";
-import { bearerTokenAuthenticationPolicyName, redirectPolicyName } from "@azure/core-rest-pipeline";
+import {
+  bearerTokenAuthenticationPolicyName,
+  createDefaultHttpClient,
+  redirectPolicyName,
+} from "@azure/core-rest-pipeline";
 import type { Pipeline, PipelineResponse } from "@azure/core-rest-pipeline";
 import type { SenderResult } from "../../types.js";
 import type { TelemetryItem as Envelope } from "../../generated/index.js";
@@ -12,6 +16,8 @@ import type { AzureMonitorExporterOptions } from "../../config.js";
 import { BaseSender } from "./baseSender.js";
 import type { TokenCredential } from "@azure/core-auth";
 import { parseRetryAfterHeader } from "../../utils/breezeUtils.js";
+import { isSameRegisteredDomain } from "../../utils/redirectUtils.js";
+import { createGzipHttpClient } from "./gzipHttpClient.js";
 
 const applicationInsightsResource = "https://monitor.azure.com/.default";
 
@@ -67,7 +73,10 @@ export class HttpSender extends BaseSender {
     // we adopt its policies onto the generated client's pipeline for backward compatibility.
     const userPipeline: Pipeline | undefined = (clientOptions as any).pipeline;
 
-    const client = new ApplicationInsightsClient(this.credential as any, clientOptions);
+    const client = new ApplicationInsightsClient(this.credential as any, {
+      ...clientOptions,
+      httpClient: createGzipHttpClient(clientOptions.httpClient ?? createDefaultHttpClient()),
+    });
 
     // Expose host for tests and redirect handling
     (client as any).host = clientOptions.host;
@@ -118,16 +127,50 @@ export class HttpSender extends BaseSender {
    */
   async shutdown(): Promise<void> {
     diag.info("HttpSender shutting down");
+    await super.shutdown();
   }
 
-  handlePermanentRedirect(location: string | undefined): void {
-    if (location) {
-      const locUrl = new url.URL(location);
-      if (locUrl && locUrl.host) {
-        this.appInsightsClientOptions.host = "https://" + locUrl.host;
-        const { credential, ...clientOptions } = this.appInsightsClientOptions;
-        this.appInsightsClient = this.createClient(clientOptions);
-      }
+  /**
+   * Apply a server-issued 307/308 redirect by re-pointing the underlying client at the new host.
+   *
+   * Returns `true` if the redirect was accepted and the client mutated; returns `false` (without
+   * mutating any state) when the redirect would cross a trust boundary -- for example, when the
+   * `Location` header points at a host outside the configured ingestion endpoint and outside the
+   * known Azure Monitor ingestion domain suffixes. Refusing cross-origin redirects is required to
+   * prevent an attacker-controlled `Location` from causing the bearer auth policy to attach a
+   * freshly-signed AAD token (and the telemetry envelope) to a foreign host on the retried call.
+   */
+  handlePermanentRedirect(location: string | undefined): boolean {
+    if (!location) {
+      return false;
     }
+    let locUrl: url.URL;
+    try {
+      locUrl = new url.URL(location);
+    } catch {
+      return false;
+    }
+    if (!locUrl.host) {
+      return false;
+    }
+
+    let currentHost: string;
+    try {
+      currentHost = new url.URL(this.appInsightsClientOptions.host ?? "").host;
+    } catch {
+      return false;
+    }
+
+    if (!isSameRegisteredDomain(currentHost, locUrl.host)) {
+      diag.error(
+        `Refusing cross-origin redirect to https://${locUrl.host}: target is neither the configured ingestion host nor under a known Azure Monitor ingestion domain.`,
+      );
+      return false;
+    }
+
+    this.appInsightsClientOptions.host = "https://" + locUrl.host;
+    const { credential, ...clientOptions } = this.appInsightsClientOptions;
+    this.appInsightsClient = this.createClient(clientOptions);
+    return true;
   }
 }

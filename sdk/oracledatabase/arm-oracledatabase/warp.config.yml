@@ -1,6 +1,13 @@
-extends: ../../../warp.base.config.yml
+# warp.config.yml — build configuration
+
 exports:
+  "./package.json": "./package.json"
+  ".": "./src/index.ts"
   "./api": "./src/api/index.ts"
+  "./api/goldenGateDeployments": "./src/api/goldenGateDeployments/index.ts"
+  "./api/goldenGateConnections": "./src/api/goldenGateConnections/index.ts"
+  "./api/databaseSystemShapeResources": "./src/api/databaseSystemShapeResources/index.ts"
+  "./api/databaseEditions": "./src/api/databaseEditions/index.ts"
   "./api/dbVersions": "./src/api/dbVersions/index.ts"
   "./api/dbSystems": "./src/api/dbSystems/index.ts"
   "./api/resourceAnchors": "./src/api/resourceAnchors/index.ts"
@@ -28,3 +35,16 @@ exports:
   "./api/cloudExadataInfrastructures": "./src/api/cloudExadataInfrastructures/index.ts"
   "./api/operations": "./src/api/operations/index.ts"
   "./models": "./src/models/index.ts"
+
+targets:
+  - name: browser
+    tsconfig: "./config/tsconfig.src.browser.json"
+
+  - name: esm
+    condition: import
+    tsconfig: "./config/tsconfig.src.esm.json"
+
+  - name: commonjs
+    condition: require
+    tsconfig: "./config/tsconfig.src.cjs.json"
+    moduleType: commonjs

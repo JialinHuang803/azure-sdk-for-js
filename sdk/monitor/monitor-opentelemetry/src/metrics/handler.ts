@@ -75,6 +75,7 @@ export class MetricHandler {
   private _liveMetrics?: LiveMetrics;
   private _config: InternalConfig;
   private _views: ViewOptions[];
+  private _shutdownPromise: Promise<void> | undefined;
 
   /**
    * Initializes a new instance of the MetricHandler class.
@@ -113,7 +114,7 @@ export class MetricHandler {
       histogramAggregation,
     );
     const metricReaderOptions: PeriodicExportingMetricReaderOptions = {
-      exporter: this._azureExporter as any,
+      exporter: this._azureExporter,
       exportIntervalMillis: this._config.metricExportIntervalMillis || defaultInterval,
     };
     this._metricReader = new PeriodicExportingMetricReader(metricReaderOptions);
@@ -159,10 +160,16 @@ export class MetricHandler {
   /**
    * Shutdown handler
    */
-  // eslint-disable-next-line @typescript-eslint/require-await
-  public async shutdown(): Promise<void> {
-    this._standardMetrics?.shutdown();
-    this._liveMetrics?.shutdown();
-    this._performanceCounters?.shutdown();
+  public shutdown(): Promise<void> {
+    this._shutdownPromise ??= this.shutdownCollectors();
+    return this._shutdownPromise;
+  }
+
+  private async shutdownCollectors(): Promise<void> {
+    await Promise.all([
+      this._liveMetrics?.shutdown(),
+      this._performanceCounters?.shutdown(),
+      this._standardMetrics?.shutdown(),
+    ]);
   }
 }

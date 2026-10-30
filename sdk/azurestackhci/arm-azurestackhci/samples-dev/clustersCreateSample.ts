@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to create an HCI cluster.
  *
  * @summary create an HCI cluster.
- * x-ms-original-file: 2026-04-01-preview/CreateCluster.json
+ * x-ms-original-file: 2026-10-01/CreateCluster.json
  */
 async function createCluster(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -16,7 +16,6 @@ async function createCluster(): Promise<void> {
   const client = new AzureStackHCIClient(credential, subscriptionId);
   const result = await client.clusters.create("test-rg", "myCluster", {
     typeIdentityType: "SystemAssigned",
-    kind: "AzureLocal",
     location: "East US",
     aadClientId: "24a6e53d-04e5-44d2-b7cc-1b732a847dfc",
     aadTenantId: "7e589cc1-a8b6-4dff-91bd-5ec0fa18db94",

@@ -1,6 +1,6 @@
 # Reviewer Agents
 
-This repository includes seven specialized AI reviewer agents that can review
+This repository includes eight specialized AI reviewer agents that can review
 pull requests for specific quality dimensions. Each agent is an expert in its
 domain and produces targeted, actionable feedback.
 
@@ -16,6 +16,12 @@ domain and produces targeted, actionable feedback.
 | **Sentinel** | `security-review-needed` | Security — credential exposure, injection, unsafe patterns, supply chain |
 | **Tester** | `test-review-needed` | Testing — coverage, recorder setup, test quality, browser tests |
 
+### On-Demand Analysis Agent
+
+| Agent | Focus |
+|-------|-------|
+| **Mgmt-breaking-change-analysis** | ARM SDK breaking change analysis — categorizes and traces root causes for PRs migrating from Swagger/AutoRest to TypeSpec/emitter. Invoked on-demand; does not trigger via a PR label. |
+
 ## Using Agents on Pull Requests
 
 ### Triggering a Review
@@ -28,9 +34,6 @@ or **admin** access.
 All seven label-triggered reviewers use the shared intake flow described below.
 Management review also accepts requests from the explicitly allowlisted
 `azure-sdk-automation[bot]`; that bot cannot request the other reviewers.
-In addition, a non-draft pull request is reviewed automatically when its title
-starts with `[AutoPR` and it has the `Mgmt` label. The trusted router and
-management reviewer both validate those conditions through the GitHub API.
 
 For example, to request an architecture review:
 
@@ -51,7 +54,7 @@ not duplicate findings from other agents.
 Review requests use a split intake, routing, and review flow:
 
 ```text
-one or more review-needed labels, or an eligible management AutoPR
+one or more review-needed labels
   -> PR Review Intake (pull_request, no repository permissions or checkout)
   -> PR Review Router (workflow_run, trusted code from the default branch)
   -> Selected reviewers (workflow_dispatch, API-only reviews and constrained safe outputs)
@@ -78,14 +81,6 @@ minutes before the run's original creation time, not its runner start or rerun
 time. The recorded actor must have the required repository role or reviewer-specific
 bot allowance. Stale labels and labels added by other requesters cannot piggyback
 on the run. Each matching event ID is passed to its reviewer.
-
-For automatic management reviews, the intake is also only a wake-up signal. The
-trusted router resolves the current PR at the intake head and requires it to be
-open, non-draft, titled with the `[AutoPR` prefix, and labeled `Mgmt`. It skips a
-PR that already has `mgmt-review-in-progress` or `mgmt-review-added`. The
-management reviewer independently repeats these checks before claiming the PR,
-which deduplicates overlapping intake events. Human-applied
-`mgmt-review-needed` labels and manual dispatch remain available for retries.
 
 Each reviewer revalidates automatic requests against the same unique PR target
 and the same current label-event ID before claiming the request. Removing or
@@ -204,6 +199,7 @@ In the Copilot Chat panel, use the `@` prefix to summon an agent by name:
 | `@dash` | Performance review |
 | `@dexter` | Dependency review |
 | `@mgmt-review` | Management SDK review |
+| `@mgmt-breaking-change-analysis` | ARM SDK breaking change analysis (on-demand) |
 | `@scribe` | Documentation review |
 | `@sentinel` | Security review |
 | `@tester` | Test coverage and quality review |
@@ -214,7 +210,7 @@ In the Copilot Chat panel, use the `@` prefix to summon an agent by name:
   explore the codebase to answer questions.
 - You can ask an agent to review specific files, a git diff, or the entire
   branch.
-- Agents follow the detailed guidelines in `.github/prompts/*-review-guidelines.md`.
+- Agents follow the detailed guidance and references in `.github/prompts/`.
 - Agents respect the same scoping rules as in CI: they ignore `src/generated/`,
   `snippets.spec.ts`, formatting issues, and domains outside their expertise.
 
@@ -228,19 +224,24 @@ Agent definitions and their detailed review guidelines are stored in:
 │   ├── archie.agent.md
 │   ├── dash.agent.md
 │   ├── dexter.agent.md
+│   ├── mgmt-breaking-change-analysis.agent.md
 │   ├── mgmt-review.agent.md
 │   ├── scribe.agent.md
 │   ├── sentinel.agent.md
 │   └── tester.agent.md
-├── prompts/                         # Detailed review guidelines
+├── prompts/                         # Detailed review and analysis guidance
 │   ├── architecture-review-guidelines.md
 │   ├── performance-review-guidelines.md
 │   ├── dependency-review-guidelines.md
+│   ├── mgmt-breaking-change-analysis-guidelines.md
+│   ├── mgmt-breaking-change-patterns.md
 │   ├── mgmt-review-guidelines.md
 │   ├── documentation-review-guidelines.md
 │   ├── security-review-guidelines.md
 │   └── test-review-guidelines.md
 └── workflows/                       # CI workflow triggers
+    ├── pr-review-intake.yml          # Unprivileged PR review signal
+    ├── pr-review-router.yml          # Trusted label-to-reviewer dispatcher
     ├── archie.md / archie.lock.yml
     ├── dash.md / dash.lock.yml
     ├── dexter.md / dexter.lock.yml
@@ -252,11 +253,20 @@ Agent definitions and their detailed review guidelines are stored in:
 
 - **`.github/agents/*.agent.md`** — Defines the agent persona, checklist, scope,
   and output format. Used by both VS Code Copilot Chat and CI workflows.
-- **`.github/prompts/*-review-guidelines.md`** — Comprehensive review guidelines
-  referenced by each agent. Edit these to update review criteria.
+- **`.github/prompts/*.md`** — Comprehensive review and analysis guidance plus
+  supporting references used by agents. Edit these to update review criteria or
+  analysis behavior.
 - **`.github/workflows/*.md`** — Agentic Workflow source files that define the
-  CI trigger (label), permissions, and tools. Compiled to `.lock.yml` via
+  CI trigger, permissions, and tools. Compiled to `.lock.yml` via
   `gh aw compile`.
+- **`eng/tools/pr-review/review-request.cjs`** — Shared deterministic routing and
+  request validation for all seven label-triggered reviewers. Its tests run
+  locally with `node --test eng/tools/pr-review/review-request.test.cjs`.
+- **`eng/tools/pr-review/ci.yml`** — Tool-owned Azure Pipelines definition for
+  the routing tests, following the dev-tool CI pattern. Branch and PR triggers
+  are path-filtered to the routing tools and reviewer workflows, rather than
+  running in every SDK package's Analyze job. Register a pipeline against this
+  YAML file in Azure DevOps to enable automatic runs.
 
 To modify an agent's behavior, edit the corresponding `.agent.md` and/or
 guidelines file. For CI trigger changes, edit the workflow `.md` file and
@@ -265,3 +275,10 @@ recompile with:
 ```bash
 gh aw compile <agent-name>
 ```
+
+Declare the publishing job's validation dependency under
+`jobs.safe_outputs.needs`, not `safe-outputs.needs`: validation runs before the
+agent, whereas the latter marks dependencies as handler-only in the pinned
+compiler and clears their values from the agent-side safe-output config.
+The routing tests check that both the agent-side and publishing configs retain
+the same validated PR number and head SHA.

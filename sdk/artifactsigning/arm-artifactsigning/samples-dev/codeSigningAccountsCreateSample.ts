@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to create an artifact Signing Account.
  *
  * @summary create an artifact Signing Account.
- * x-ms-original-file: 2025-10-13/CodeSigningAccounts_Create.json
+ * x-ms-original-file: 2026-05-15-preview/CodeSigningAccounts_Create.json
  */
 async function createAnArtifactSigningAccount(): Promise<void> {
   const credential = new DefaultAzureCredential();

@@ -8,7 +8,7 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to get a EdgeMachineJob
  *
  * @summary get a EdgeMachineJob
- * x-ms-original-file: 2026-04-01-preview/EdgeMachineJobs_Get_CollectLog.json
+ * x-ms-original-file: 2026-10-01/EdgeMachineJobs_Get_CollectLog.json
  */
 async function edgeMachineJobsGetCollectLog(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -22,7 +22,7 @@ async function edgeMachineJobsGetCollectLog(): Promise<void> {
  * This sample demonstrates how to get a EdgeMachineJob
  *
  * @summary get a EdgeMachineJob
- * x-ms-original-file: 2026-04-01-preview/EdgeMachineJobs_Get_ProvisionOs.json
+ * x-ms-original-file: 2026-10-01/EdgeMachineJobs_Get_ProvisionOs.json
  */
 async function edgeMachineJobsGetProvisionOs(): Promise<void> {
   const credential = new DefaultAzureCredential();
@@ -36,7 +36,7 @@ async function edgeMachineJobsGetProvisionOs(): Promise<void> {
  * This sample demonstrates how to get a EdgeMachineJob
  *
  * @summary get a EdgeMachineJob
- * x-ms-original-file: 2026-04-01-preview/EdgeMachineJobs_Get_RemoteSupport.json
+ * x-ms-original-file: 2026-10-01/EdgeMachineJobs_Get_RemoteSupport.json
  */
 async function edgeMachineJobsGetRemoteSupport(): Promise<void> {
   const credential = new DefaultAzureCredential();

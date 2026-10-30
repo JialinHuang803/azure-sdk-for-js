@@ -28,6 +28,7 @@ export type {
   Action,
   CertificatePolicyAction,
   IssuerParameters,
+  PlatformManaged,
   Contacts,
   Contact,
   CertificateIssuerItem,
@@ -87,3 +88,4 @@ export type {
   GetCertificatesOptionalParams,
 } from "./api/index.js";
 export type { PageSettings, ContinuablePage, PagedAsyncIterableIterator };
+export { RestError, isRestError } from "@azure/core-rest-pipeline";

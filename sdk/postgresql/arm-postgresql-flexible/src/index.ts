@@ -78,6 +78,7 @@ export type {
   EncryptionKeyStatus,
   Backup,
   GeographicallyRedundantBackup,
+  ImmutableBackup,
   Network,
   ServerPublicNetworkAccessState,
   HighAvailability,
@@ -97,6 +98,7 @@ export type {
   PrivateEndpointServiceConnectionStatus,
   PrivateEndpointConnectionProvisioningState,
   Cluster,
+  FipsMode,
   Sku,
   UserAssignedIdentity,
   UserIdentity,
@@ -113,6 +115,9 @@ export type {
   FailoverMode,
   MigrateNetworkStatus,
   NetworkMigrationState,
+  StartMajorVersionUpgradePrecheckRequest,
+  StartMajorVersionUpgradePrecheckResponse,
+  MajorVersionUpgradePrecheckStatus,
   Configuration,
   ConfigurationProperties,
   ConfigurationDataType,
@@ -128,6 +133,25 @@ export type {
   VirtualEndpointResourceProperties,
   VirtualEndpointType,
   VirtualEndpointResourceForPatch,
+  MaintenanceEventResource,
+  MaintenanceEventResourceProperties,
+  MaintenanceType,
+  MaintenanceEventStatus,
+  MaintenanceEventRescheduleRequest,
+  MaintenanceEventActionResponse,
+  MajorVersionUpgradePrecheckResource,
+  MajorVersionUpgradePrecheckResourceProperties,
+  PrecheckResult,
+  UpgradeSequence,
+  PrecheckErrorInfo,
+  PolicyDetail,
+  DbAgent,
+  DbAgentProperties,
+  DbAgentState,
+  DbAgentProvisioningState,
+  DbAgentForUpdate,
+  DbAgentForUpdateProperties,
+  DbAgentForUpdateState,
   AdministratorMicrosoftEntra,
   AdministratorMicrosoftEntraProperties,
   PrincipalType,
@@ -193,6 +217,7 @@ export type {
   VirtualNetworkSubnetUsageModel,
   DelegatedSubnetUsage,
   MigrationListFilter,
+  MaintenanceEventStatusFilter,
   RecommendationTypeParameterEnum,
   PrivateDnsZoneSuffixGetResponse,
 } from "./models/index.js";
@@ -225,6 +250,7 @@ export {
   KnownDataEncryptionType,
   KnownEncryptionKeyStatus,
   KnownGeographicallyRedundantBackup,
+  KnownImmutableBackup,
   KnownServerPublicNetworkAccessState,
   KnownPostgreSqlFlexibleServerHighAvailabilityMode,
   KnownHighAvailabilityState,
@@ -235,12 +261,18 @@ export {
   KnownCreateMode,
   KnownPrivateEndpointServiceConnectionStatus,
   KnownPrivateEndpointConnectionProvisioningState,
+  KnownFipsMode,
   KnownIdentityType,
   KnownCreateModeForPatch,
   KnownFailoverMode,
   KnownNetworkMigrationState,
+  KnownMajorVersionUpgradePrecheckStatus,
   KnownConfigurationDataType,
   KnownVirtualEndpointType,
+  KnownMaintenanceType,
+  KnownMaintenanceEventStatus,
+  KnownDbAgentState,
+  KnownDbAgentProvisioningState,
   KnownPrincipalType,
   KnownHighAvailabilityMode,
   KnownFeatureStatus,
@@ -258,6 +290,7 @@ export {
   KnownRecommendationTypeEnum,
   KnownCheckNameAvailabilityReason,
   KnownMigrationListFilter,
+  KnownMaintenanceEventStatusFilter,
   KnownRecommendationTypeParameterEnum,
   KnownVersions,
 } from "./models/index.js";
@@ -300,11 +333,26 @@ export type {
   DatabasesGetOptionalParams,
 } from "./api/databases/index.js";
 export type {
+  DbAgentsCreateOrUpdateOptionalParams,
+  DbAgentsGetOptionalParams,
+  DbAgentsListOptionalParams,
+} from "./api/dbAgents/index.js";
+export type {
   FirewallRulesListByServerOptionalParams,
   FirewallRulesDeleteOptionalParams,
   FirewallRulesCreateOrUpdateOptionalParams,
   FirewallRulesGetOptionalParams,
 } from "./api/firewallRules/index.js";
+export type {
+  MaintenanceEventsApplyNowOptionalParams,
+  MaintenanceEventsRescheduleOptionalParams,
+  MaintenanceEventsListOptionalParams,
+  MaintenanceEventsGetOptionalParams,
+} from "./api/maintenanceEvents/index.js";
+export type {
+  MajorVersionUpgradePrecheckListOptionalParams,
+  MajorVersionUpgradePrecheckGetOptionalParams,
+} from "./api/majorVersionUpgradePrecheck/index.js";
 export type {
   MigrationsCheckNameAvailabilityOptionalParams,
   MigrationsListByTargetServerOptionalParams,
@@ -332,6 +380,7 @@ export type {
 export type { QuotaUsagesListOptionalParams } from "./api/quotaUsages/index.js";
 export type { ReplicasListByServerOptionalParams } from "./api/replicas/index.js";
 export type {
+  ServersStartMajorVersionUpgradePrecheckOptionalParams,
   ServersMigrateNetworkModeOptionalParams,
   ServersStopOptionalParams,
   ServersStartOptionalParams,
@@ -345,10 +394,10 @@ export type {
 } from "./api/servers/index.js";
 export type { ServerThreatProtectionSettingsCreateOrUpdateOptionalParams } from "./api/serverThreatProtectionSettings/index.js";
 export type {
-  TuningOptionsListRecommendationsOptionalParams,
-  TuningOptionsListByServerOptionalParams,
-  TuningOptionsGetOptionalParams,
-} from "./api/tuningOptions/index.js";
+  TuningOptionsOperationsListRecommendationsOptionalParams,
+  TuningOptionsOperationsListByServerOptionalParams,
+  TuningOptionsOperationsGetOptionalParams,
+} from "./api/tuningOptionsOperations/index.js";
 export type {
   VirtualEndpointsListByServerOptionalParams,
   VirtualEndpointsDeleteOptionalParams,
@@ -367,7 +416,10 @@ export type {
   CapturedLogsOperations,
   ConfigurationsOperations,
   DatabasesOperations,
+  DbAgentsOperations,
   FirewallRulesOperations,
+  MaintenanceEventsOperations,
+  MajorVersionUpgradePrecheckOperations,
   MigrationsOperations,
   NameAvailabilityOperations,
   OperationsOperations,
@@ -378,10 +430,11 @@ export type {
   ReplicasOperations,
   ServersOperations,
   ServerThreatProtectionSettingsOperations,
-  TuningOptionsOperations,
+  TuningOptionsOperationsOperations,
   VirtualEndpointsOperations,
   VirtualNetworkSubnetUsageOperations,
 } from "./classic/index.js";
 export type { PageSettings, ContinuablePage, PagedAsyncIterableIterator };
 export { AzureClouds };
 export type { AzureSupportedClouds };
+export { RestError, isRestError } from "@azure/core-rest-pipeline";

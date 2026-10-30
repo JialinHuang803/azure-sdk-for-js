@@ -3,31 +3,21 @@
 
 import { OperationalInsightsManagementClient } from "@azure/arm-operationalinsights";
 import { DefaultAzureCredential } from "@azure/identity";
-import "dotenv/config";
 
 /**
- * This sample demonstrates how to Gets a storage insight instance.
+ * This sample demonstrates how to gets a storage insight instance.
  *
- * @summary Gets a storage insight instance.
- * x-ms-original-file: specification/operationalinsights/resource-manager/Microsoft.OperationalInsights/OperationalInsights/stable/2025-07-01/examples/StorageInsightsGet.json
+ * @summary gets a storage insight instance.
+ * x-ms-original-file: 2025-07-01/StorageInsightsGet.json
  */
 async function storageInsightsGet(): Promise<void> {
-  const subscriptionId =
-    process.env["OPERATIONALINSIGHTS_SUBSCRIPTION_ID"] ||
-    "00000000-0000-0000-0000-00000000000";
-  const resourceGroupName =
-    process.env["OPERATIONALINSIGHTS_RESOURCE_GROUP"] || "OIAutoRest5123";
-  const workspaceName = "aztest5048";
-  const storageInsightName = "AzTestSI1110";
   const credential = new DefaultAzureCredential();
-  const client = new OperationalInsightsManagementClient(
-    credential,
-    subscriptionId,
-  );
+  const subscriptionId = "00000000-0000-0000-0000-000000000000";
+  const client = new OperationalInsightsManagementClient(credential, subscriptionId);
   const result = await client.storageInsightConfigs.get(
-    resourceGroupName,
-    workspaceName,
-    storageInsightName,
+    "OIAutoRest5123",
+    "aztest5048",
+    "AzTestSI1110",
   );
   console.log(result);
 }

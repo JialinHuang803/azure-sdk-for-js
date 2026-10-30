@@ -2,6 +2,9 @@
 // Licensed under the MIT License.
 
 export {
+  refreshApplicableUpdates,
+  refreshSecuritySettings,
+  validate,
   listBySubscription,
   listByResourceGroup,
   $delete,
@@ -10,6 +13,9 @@ export {
   get,
 } from "./operations.js";
 export type {
+  EdgeMachinesRefreshApplicableUpdatesOptionalParams,
+  EdgeMachinesRefreshSecuritySettingsOptionalParams,
+  EdgeMachinesValidateOptionalParams,
   EdgeMachinesListBySubscriptionOptionalParams,
   EdgeMachinesListByResourceGroupOptionalParams,
   EdgeMachinesDeleteOptionalParams,

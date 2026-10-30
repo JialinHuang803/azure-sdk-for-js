@@ -7,10 +7,12 @@
 import { AzureLogger } from '@azure/logger';
 import type * as coreClient from '@azure-rest/core-client';
 import type { ExtendedCommonClientOptions } from '@azure/keyvault-common';
+import { isRestError } from '@azure/core-rest-pipeline';
 import type { PagedAsyncIterableIterator } from '@azure/core-paging';
 import type { PageSettings } from '@azure/core-paging';
 import type { PollerLike } from '@azure/core-lro';
 import type { PollOperationState } from '@azure/core-lro';
+import { RestError } from '@azure/core-rest-pipeline';
 import type { TokenCredential } from '@azure/core-auth';
 
 // @public
@@ -54,6 +56,8 @@ export interface GetSecretOptions extends coreClient.OperationOptions {
     outContentType?: ContentType;
     version?: string;
 }
+
+export { isRestError }
 
 // @public
 export interface KeyVaultSecret {
@@ -117,6 +121,8 @@ export { PollOperationState }
 export interface PurgeDeletedSecretOptions extends coreClient.OperationOptions {
 }
 
+export { RestError }
+
 // @public
 export interface RestoreSecretBackupOptions extends coreClient.OperationOptions {
 }
@@ -142,7 +148,7 @@ export class SecretClient {
 // @public
 export interface SecretClientOptions extends ExtendedCommonClientOptions {
     disableChallengeResourceVerification?: boolean;
-    serviceVersion?: "7.0" | "7.1" | "7.2" | "7.3" | "7.4" | "7.5" | "7.6" | "2025-07-01";
+    serviceVersion?: "7.0" | "7.1" | "7.2" | "7.3" | "7.4" | "7.5" | "7.6" | "2025-07-01" | "2026-04-01";
 }
 
 // @public

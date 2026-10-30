@@ -43,7 +43,7 @@ export function _listByGalleryImageSend(
       resourceGroupName: resourceGroupName,
       galleryName: galleryName,
       galleryImageName: galleryImageName,
-      "api%2Dversion": "2025-03-03",
+      "api%2Dversion": "2026-03-03",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -61,7 +61,9 @@ export async function _listByGalleryImageDeserialize(
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -83,7 +85,7 @@ export function listByGalleryImage(
       _listByGalleryImageSend(context, resourceGroupName, galleryName, galleryImageName, options),
     _listByGalleryImageDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2025-03-03" },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: "2026-03-03" },
   );
 }
 
@@ -96,14 +98,15 @@ export function _$deleteSend(
   options: GalleryImageVersionsDeleteOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
-    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions/{galleryImageVersionName}{?api%2Dversion}",
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions/{galleryImageVersionName}{?api%2Dversion,bypassSoftDelete}",
     {
       subscriptionId: context.subscriptionId,
       resourceGroupName: resourceGroupName,
       galleryName: galleryName,
       galleryImageName: galleryImageName,
       galleryImageVersionName: galleryImageVersionName,
-      "api%2Dversion": "2025-03-03",
+      "api%2Dversion": "2026-03-03",
+      bypassSoftDelete: options?.bypassSoftDelete,
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -116,7 +119,9 @@ export async function _$deleteDeserialize(result: PathUncheckedResponse): Promis
   const expectedStatuses = ["200", "202", "204"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -125,11 +130,6 @@ export async function _$deleteDeserialize(result: PathUncheckedResponse): Promis
 }
 
 /** Delete a gallery image version. */
-/**
- *  @fixme delete is a reserved word that cannot be used as an operation name.
- *         Please add @clientName("clientName") or @clientName("<JS-Specific-Name>", "javascript")
- *         to the operation to override the generated name.
- */
 export function $delete(
   context: Client,
   resourceGroupName: string,
@@ -151,7 +151,7 @@ export function $delete(
         options,
       ),
     resourceLocationConfig: "location",
-    apiVersion: "2025-03-03",
+    apiVersion: "2026-03-03",
   }) as PollerLike<OperationState<void>, void>;
 }
 
@@ -172,7 +172,7 @@ export function _updateSend(
       galleryName: galleryName,
       galleryImageName: galleryImageName,
       galleryImageVersionName: galleryImageVersionName,
-      "api%2Dversion": "2025-03-03",
+      "api%2Dversion": "2026-03-03",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -192,7 +192,9 @@ export async function _updateDeserialize(
   const expectedStatuses = ["200", "201", "202"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -224,7 +226,7 @@ export function update(
         options,
       ),
     resourceLocationConfig: "location",
-    apiVersion: "2025-03-03",
+    apiVersion: "2026-03-03",
   }) as PollerLike<OperationState<GalleryImageVersion>, GalleryImageVersion>;
 }
 
@@ -245,7 +247,7 @@ export function _createOrUpdateSend(
       galleryName: galleryName,
       galleryImageName: galleryImageName,
       galleryImageVersionName: galleryImageVersionName,
-      "api%2Dversion": "2025-03-03",
+      "api%2Dversion": "2026-03-03",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -265,7 +267,9 @@ export async function _createOrUpdateDeserialize(
   const expectedStatuses = ["200", "201", "202"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
@@ -297,7 +301,7 @@ export function createOrUpdate(
         options,
       ),
     resourceLocationConfig: "location",
-    apiVersion: "2025-03-03",
+    apiVersion: "2026-03-03",
   }) as PollerLike<OperationState<GalleryImageVersion>, GalleryImageVersion>;
 }
 
@@ -317,7 +321,7 @@ export function _getSend(
       galleryName: galleryName,
       galleryImageName: galleryImageName,
       galleryImageVersionName: galleryImageVersionName,
-      "api%2Dversion": "2025-03-03",
+      "api%2Dversion": "2026-03-03",
       "%24expand": options?.expand,
     },
     {
@@ -334,7 +338,9 @@ export async function _getDeserialize(result: PathUncheckedResponse): Promise<Ga
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
-    error.details = cloudErrorDeserializer(result.body);
+    if (result.body) {
+      error.details = cloudErrorDeserializer(result.body);
+    }
 
     throw error;
   }
