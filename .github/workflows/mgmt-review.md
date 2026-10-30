@@ -75,6 +75,9 @@ network:
 tools:
   github:
     toolsets: [context, repos, pull_requests, actions]
+    allowed-repos: public
+    min-integrity: approved
+    trusted-users: ["JialinHuang803"]
   bash: ["cat", "date", "echo", "grep", "head", "ls", "pwd", "sort", "tail", "uniq", "wc"]
   cache-memory:
   repo-memory:
@@ -135,8 +138,6 @@ safe-outputs:
     allowed: [mgmt-review-in-progress]
     max: 1
     target: "${{ needs.validate_request.outputs.pr_number }}"
-  dispatch-workflow:
-    - format-auto-fix
   messages:
     footer: "> ⚡ *Benchmarked by [{workflow_name}]({run_url})*"
     run-started: "⚡ [{workflow_name}]({run_url}) is profiling this PR for guidance and review..."

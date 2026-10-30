@@ -136,6 +136,10 @@ validated dispatch contract. The bot allowlist is scoped to each reviewer.
 - If no issues are found, the agent posts a single summary comment noting that
   no significant issues were identified.
 
+This fork's management-review test harness explicitly trusts content authored by `JialinHuang803` while retaining the `approved` GitHub integrity threshold for other authors.
+The trigger's bot allowlist authorizes review requests; it does not grant access to PR content through the GitHub tools.
+The fork test harness does not expose the `format-auto-fix` dispatch output, keeping live tests limited to review comments and management-review labels.
+
 ### Recommended Combinations
 
 | Scenario | Labels to Apply |

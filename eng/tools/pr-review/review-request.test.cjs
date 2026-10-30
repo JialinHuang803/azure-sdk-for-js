@@ -1278,12 +1278,32 @@ test("Dash requires external benchmark evidence instead of executing PR-derived 
   assert.doesNotMatch(dash, /write and run a quick|Run it with `node/);
 });
 
-test("management review retains its specialized threat detection and format-fix dispatch", () => {
+test("management review retains specialized threat detection without format-fix dispatch", () => {
   const management = workflowText("mgmt-review.md");
   assert.match(management, /bots: \[github-actions, azure-sdk-automation\]/);
   assert.match(management, /threat-detection:/);
   assert.match(management, /model: gpt-5\.6-sol/);
-  assert.match(management, /dispatch-workflow:\s+- format-auto-fix/);
+  assert.doesNotMatch(management, /dispatch-workflow:\s+- format-auto-fix/);
+});
+
+test("management review trusts its fork fixture author without lowering the integrity threshold", () => {
+  const management = workflowText("mgmt-review.md");
+  const github = management.split("\n  github:\n")[1].split("\n  bash:")[0];
+  assert.match(github, /^    allowed-repos: public$/m);
+  assert.match(github, /^    min-integrity: approved$/m);
+  assert.match(github, /^    trusted-users: \["JialinHuang803"\]$/m);
+
+  const compiled = workflowText("mgmt-review.lock.yml");
+  const githubPolicy = compiled.split('"guard-policies": {')[1].split('"safeoutputs": {')[0];
+  assert.match(githubPolicy, /"min-integrity": "approved"/);
+  assert.match(githubPolicy, /"repos": "public"/);
+  assert.match(compiled, /^          GH_AW_TRUSTED_USERS_EXTRA: JialinHuang803$/m);
+  assert.match(
+    compiled,
+    /GH_AW_GUARD_TRUSTED_USERS: \$\{\{ steps\.parse-guard-vars\.outputs\.trusted_users \}\}/,
+  );
+  assert.match(githubPolicy, /"trusted-users": \$\{GH_AW_GUARD_TRUSTED_USERS\}/);
+  assert.match(compiled, /"write-sink": \{/);
 });
 
 test("management API exclusions remain explicit within the public-surface review step", () => {
