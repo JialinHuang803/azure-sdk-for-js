@@ -1286,6 +1286,17 @@ test("management review retains specialized threat detection without format-fix 
   assert.doesNotMatch(management, /dispatch-workflow:\s+- format-auto-fix/);
 });
 
+test("management review keeps memory scoped to the Actions cache", () => {
+  const management = workflowText("mgmt-review.md");
+  assert.match(management, /^  cache-memory:$/m);
+  assert.doesNotMatch(management, /^  repo-memory:$/m);
+
+  const compiled = workflowText("mgmt-review.lock.yml");
+  assert.match(compiled, /cache-memory/);
+  assert.doesNotMatch(compiled, /repo-memory/);
+  assert.doesNotMatch(compiled, /push_repo_memory/);
+});
+
 test("management review trusts its fork fixture author without lowering the integrity threshold", () => {
   const management = workflowText("mgmt-review.md");
   const github = management.split("\n  github:\n")[1].split("\n  bash:")[0];
