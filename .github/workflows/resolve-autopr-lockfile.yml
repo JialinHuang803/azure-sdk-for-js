@@ -150,7 +150,7 @@ jobs:
             core.setOutput('has_prs', dirtyPrs.length > 0 ? 'true' : 'false');
 
   resolve:
-    name: Resolve lockfile (PR #${{ matrix.pr_number }})
+    name: "Resolve lockfile (PR #${{ matrix.pr_number }})"
     needs: discover
     if: needs.discover.outputs.has_prs == 'true'
     runs-on: ubuntu-latest
