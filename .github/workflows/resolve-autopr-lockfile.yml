@@ -1,0 +1,364 @@
+name: Resolve AutoPR pnpm-lock Conflicts
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Specific AutoPR number to resolve (leave empty to sweep all eligible conflicting AutoPRs)
+        required: false
+        type: string
+
+# Least-privilege default; individual jobs request only what they need.
+permissions: {}
+
+concurrency:
+  group: resolve-autopr-lockfile-${{ github.event.inputs.pr_number || 'sweep' }}
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    name: Discover conflicting AutoPRs
+    if: github.repository == 'Azure/azure-sdk-for-js' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      prs: ${{ steps.find-prs.outputs.prs }}
+    steps:
+      - name: Find eligible conflicting AutoPRs
+        id: find-prs
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          INPUT_PR_NUMBER: ${{ github.event.inputs.pr_number }}
+        with:
+          script: |
+            const baseRepo = `${context.repo.owner}/${context.repo.repo}`;
+            const ALLOWED_AUTHOR = 'JialinHuang803';
+            const ALLOWED_BRANCH_PREFIX = 'sdkauto/';
+            const ALLOWED_BASE_BRANCH = 'main';
+
+            const isEligibleBase = (pr) => {
+              if (pr.state !== 'open') return 'PR is not open';
+              if (pr.head?.repo?.full_name !== baseRepo) {
+                return `PR is from fork ${pr.head?.repo?.full_name || 'unknown'}`;
+              }
+              if (pr.base?.ref !== ALLOWED_BASE_BRANCH) {
+                return `PR targets ${pr.base?.ref}, not ${ALLOWED_BASE_BRANCH}`;
+              }
+              if (pr.user?.login !== ALLOWED_AUTHOR) {
+                return `PR author is ${pr.user?.login}, not ${ALLOWED_AUTHOR}`;
+              }
+              if (!pr.head?.ref?.startsWith(ALLOWED_BRANCH_PREFIX)) {
+                return `PR branch ${pr.head?.ref} does not start with ${ALLOWED_BRANCH_PREFIX}`;
+              }
+              return null;
+            };
+
+            const getPrWithMergeState = async (pullNumber) => {
+              // GitHub computes mergeable_state asynchronously on first read; retry briefly if null.
+              for (let attempt = 0; attempt < 3; attempt++) {
+                const { data: pr } = await github.rest.pulls.get({
+                  ...context.repo,
+                  pull_number: pullNumber,
+                });
+                if (pr.mergeable !== null && pr.mergeable_state !== 'unknown') {
+                  return pr;
+                }
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+              }
+              const { data: pr } = await github.rest.pulls.get({
+                ...context.repo,
+                pull_number: pullNumber,
+              });
+              return pr;
+            };
+
+            const prNumberInput = (process.env.INPUT_PR_NUMBER || '').trim();
+            if (!prNumberInput && context.eventName === 'push') {
+              // Give GitHub time to invalidate and recompute mergeable_state after a push to main.
+              core.info('Waiting 30s for GitHub to recompute PR mergeability after push to main...');
+              await new Promise((resolve) => setTimeout(resolve, 30000));
+            }
+            if (prNumberInput) {
+              if (!/^\d+$/.test(prNumberInput)) {
+                core.setFailed(`Invalid pr_number input: ${prNumberInput}`);
+                return;
+              }
+              const prNumber = parseInt(prNumberInput, 10);
+              const pr = await getPrWithMergeState(prNumber);
+              const reason = isEligibleBase(pr);
+              if (reason) {
+                core.warning(`PR #${prNumber} skipped: ${reason}`);
+                core.setOutput('prs', '[]');
+                return;
+              }
+              if (pr.mergeable_state !== 'dirty') {
+                core.info(`PR #${prNumber} mergeable_state is '${pr.mergeable_state}' (not dirty) — skipping`);
+                core.setOutput('prs', '[]');
+                return;
+              }
+              core.info(`Selected PR #${prNumber} (${pr.head.ref})`);
+              core.setOutput('prs', JSON.stringify([prNumber]));
+              return;
+            }
+
+            const openPrs = await github.paginate(github.rest.pulls.list, {
+              ...context.repo,
+              state: 'open',
+              base: ALLOWED_BASE_BRANCH,
+              sort: 'updated',
+              direction: 'desc',
+              per_page: 100,
+            });
+
+            const candidates = openPrs.filter((pr) => {
+              if (pr.draft) return false;
+              if ((pr.title || '').startsWith('Failed-')) return false;
+              return isEligibleBase(pr) === null;
+            });
+
+            core.info(`Found ${candidates.length} open eligible AutoPR(s); checking merge state`);
+
+            const dirtyPrs = [];
+            for (const candidate of candidates) {
+              const pr = await getPrWithMergeState(candidate.number);
+              if (pr.mergeable_state === 'dirty') {
+                core.info(`Queueing conflicting AutoPR #${pr.number} (${pr.head.ref})`);
+                dirtyPrs.push(pr.number);
+              }
+            }
+
+            core.info(`Selected ${dirtyPrs.length} conflicting AutoPR(s): ${JSON.stringify(dirtyPrs)}`);
+            core.setOutput('prs', JSON.stringify(dirtyPrs));
+
+  resolve:
+    name: Resolve lockfile conflicts
+    needs: discover
+    if: needs.discover.outputs.prs != '' && needs.discover.outputs.prs != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 'lts/*'
+
+      - name: Get pnpm version from main
+        id: pnpm-version
+        run: |
+          PNPM_VERSION=$(node -p "require('./package.json').packageManager.split('@')[1]")
+          echo "version=$PNPM_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@d9184bf108216479bc5a137cc391f4d7b14c870b # v6.1.0
+        with:
+          version: ${{ steps.pnpm-version.outputs.version }}
+
+      - name: Resolve pnpm-lock.yaml conflicts
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PRS_JSON: ${{ needs.discover.outputs.prs }}
+        with:
+          script: |
+            const { execFileSync } = require('child_process');
+            const fs = require('fs');
+
+            const baseRepo = `${context.repo.owner}/${context.repo.repo}`;
+            const ALLOWED_AUTHOR = 'JialinHuang803';
+            const ALLOWED_BRANCH_PREFIX = 'sdkauto/';
+            const ALLOWED_BASE_BRANCH = 'main';
+
+            const escapeHtml = (value) =>
+              String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
+            const runCapture = (cmd, args) =>
+              execFileSync(cmd, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+
+            const runStream = (cmd, args) =>
+              execFileSync(cmd, args, { stdio: 'inherit' });
+
+            const resetWorktree = () => {
+              try {
+                execFileSync('git', ['merge', '--abort'], { stdio: 'ignore' });
+              } catch {
+                // No merge in progress.
+              }
+              execFileSync('git', ['checkout', '--detach', '--force', 'origin/main'], { stdio: 'ignore' });
+              execFileSync('git', ['clean', '-fdx'], { stdio: 'ignore' });
+            };
+
+            runStream('git', ['config', 'user.name', 'github-actions[bot]']);
+            runStream('git', ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com']);
+
+            const prNumbers = JSON.parse(process.env.PRS_JSON || '[]');
+            const results = [];
+
+            for (const prNumber of prNumbers) {
+              let prBranch = '';
+              core.startGroup(`PR #${prNumber}`);
+              try {
+                const { data: pr } = await github.rest.pulls.get({
+                  ...context.repo,
+                  pull_number: prNumber,
+                });
+
+                prBranch = pr.head?.ref || '';
+                const eligible =
+                  pr.state === 'open' &&
+                  pr.head?.repo?.full_name === baseRepo &&
+                  pr.base?.ref === ALLOWED_BASE_BRANCH &&
+                  pr.user?.login === ALLOWED_AUTHOR &&
+                  prBranch.startsWith(ALLOWED_BRANCH_PREFIX);
+
+                if (!eligible) {
+                  core.warning(`PR #${prNumber} is no longer eligible — skipping`);
+                  results.push({ prNumber, prBranch, status: '⏭️ Skipped', details: 'No longer eligible' });
+                  continue;
+                }
+
+                const prHeadSha = pr.head.sha;
+                runStream('git', [
+                  'fetch',
+                  '--no-tags',
+                  'origin',
+                  ALLOWED_BASE_BRANCH,
+                  `refs/heads/${prBranch}:refs/remotes/origin/${prBranch}`,
+                ]);
+                runStream('git', ['checkout', '-B', prBranch, `refs/remotes/origin/${prBranch}`]);
+
+                const currentSha = runCapture('git', ['rev-parse', 'HEAD']);
+                if (currentSha !== prHeadSha) {
+                  core.info(`Branch moved from ${prHeadSha} to ${currentSha} since validation — skipping`);
+                  results.push({ prNumber, prBranch, status: '⏭️ Skipped', details: 'Branch moved since validation' });
+                  continue;
+                }
+
+                let mergeHadConflict = false;
+                try {
+                  runStream('git', ['merge', '--no-commit', '--no-ff', 'origin/main']);
+                } catch {
+                  mergeHadConflict = true;
+                }
+
+                if (!mergeHadConflict) {
+                  core.info('No merge conflicts detected — aborting uncommitted merge and skipping');
+                  results.push({ prNumber, prBranch, status: '⏭️ Skipped', details: 'No merge conflicts' });
+                  continue;
+                }
+
+                const conflictedFiles = runCapture('git', ['diff', '--name-only', '--diff-filter=U']);
+                if (conflictedFiles !== 'pnpm-lock.yaml') {
+                  core.info(`Conflicts exist outside pnpm-lock.yaml; manual resolution required:\n${conflictedFiles}`);
+                  const fileList = conflictedFiles.split(/\r?\n/).filter(Boolean).join(', ') || 'none';
+                  results.push({
+                    prNumber,
+                    prBranch,
+                    status: '⏭️ Skipped',
+                    details: `Conflicts outside pnpm-lock.yaml: ${fileList}`,
+                  });
+                  continue;
+                }
+
+                core.info("Only pnpm-lock.yaml has merge conflicts; regenerating from main's lockfile");
+                runStream('git', ['checkout', 'origin/main', '--', 'pnpm-lock.yaml']);
+
+                // Regenerate lockfile only without installing node_modules or running any scripts/hooks.
+                runStream('pnpm', [
+                  'install',
+                  '--lockfile-only',
+                  '--no-frozen-lockfile',
+                  '--ignore-scripts',
+                  '--ignore-pnpmfile',
+                ]);
+
+                const untrackedFiles = runCapture('git', ['ls-files', '--others', '--exclude-standard']);
+                if (untrackedFiles) {
+                  throw new Error(`Unexpected untracked files created during lockfile regeneration: ${untrackedFiles}`);
+                }
+
+                const unstagedFiles = runCapture('git', ['diff', '--name-only']);
+                if (unstagedFiles && unstagedFiles !== 'pnpm-lock.yaml') {
+                  throw new Error(`Unexpected files modified during lockfile regeneration: ${unstagedFiles}`);
+                }
+
+                const lockfileContent = fs.readFileSync('pnpm-lock.yaml', 'utf8');
+                if (/^(<<<<<<<|=======|>>>>>>>)/m.test(lockfileContent)) {
+                  throw new Error('Conflict markers remain in pnpm-lock.yaml');
+                }
+
+                runStream('git', ['add', 'pnpm-lock.yaml']);
+                runStream('git', [
+                  'commit',
+                  '-m',
+                  `Merge branch 'main' into ${prBranch} and resolve pnpm-lock.yaml conflict`,
+                ]);
+                runStream('git', ['push', 'origin', `HEAD:refs/heads/${prBranch}`]);
+
+                await github.rest.issues.createComment({
+                  ...context.repo,
+                  issue_number: prNumber,
+                  body: '✅ Automatically merged `main` and resolved the `pnpm-lock.yaml` merge conflict.',
+                });
+
+                results.push({
+                  prNumber,
+                  prBranch,
+                  status: '✅ Resolved',
+                  details: 'Merged `main` and regenerated `pnpm-lock.yaml`',
+                });
+              } catch (err) {
+                const message = err instanceof Error ? err.message : String(err);
+                core.error(`Failed to resolve PR #${prNumber}: ${message}`);
+                results.push({
+                  prNumber,
+                  prBranch,
+                  status: '❌ Failed',
+                  details: message.split(/\r?\n/)[0],
+                });
+              } finally {
+                resetWorktree();
+                core.endGroup();
+              }
+            }
+
+            const rows = [
+              [
+                { data: 'PR', header: true },
+                { data: 'Branch', header: true },
+                { data: 'Status', header: true },
+                { data: 'Details', header: true },
+              ],
+              ...results.map((r) => [
+                `<a href="https://github.com/${baseRepo}/pull/${r.prNumber}">#${r.prNumber}</a>`,
+                r.prBranch ? `<code>${escapeHtml(r.prBranch)}</code>` : '—',
+                r.status,
+                escapeHtml(r.details),
+              ]),
+            ];
+
+            await core.summary
+              .addHeading('AutoPR pnpm-lock.yaml Conflict Resolution', 2)
+              .addTable(rows)
+              .write();
+
+            const failedCount = results.filter((r) => r.status === '❌ Failed').length;
+            if (failedCount > 0) {
+              core.setFailed(`${failedCount} of ${results.length} AutoPR(s) failed lockfile resolution`);
+            }
